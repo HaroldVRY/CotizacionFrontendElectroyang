@@ -1,1 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
+body {
+  background: linear-gradient(to bottom, #1e90ff, #99badd); /* Degradado de verde a negro */
+  min-height: 100%; /* Asegura que el fondo se expanda para cubrir toda la página */
+}

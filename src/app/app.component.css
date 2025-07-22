@@ -1,0 +1,12 @@
+/* Estilos para el contenido principal */
+.content {
+  transition: margin-left 0.3s ease; /* Transición suave para el cambio de margen */
+  padding: 20px;
+}
+
+/* Para pantallas pequeñas (responsive), asegurarse de que el content ocupe todo el espacio disponible */
+@media (max-width: 1000px) {
+  .content {
+    margin-left: 0; /* El sidebar no debe ocupar espacio en pantallas pequeñas */
+  }
+}

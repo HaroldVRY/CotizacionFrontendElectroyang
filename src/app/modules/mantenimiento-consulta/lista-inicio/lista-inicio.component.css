@@ -1,0 +1,120 @@
+/* Reset de márgenes y padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  line-height: 1.6;
+  background-color: #f4f4f4;
+}
+
+/* Sección sobre mí */
+#about-me {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Cabecera con foto y breve introducción */
+.about-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 3rem;
+}
+
+.avatar {
+  margin-right: 2rem;
+
+}
+
+.avatar img {
+  width: 200px;
+  height: 200px;
+  border-radius: 100%;
+  object-fit: cover;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.intro h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.intro .profession {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #007bff;
+  margin-bottom: 1rem;
+}
+
+.intro .description {
+  font-size: 1rem;
+  color: #555;
+  text-align: justify;
+  line-height: 1.8;
+}
+
+/* Especialización */
+.specialization {
+  margin-bottom: 3rem;
+}
+
+.specialization h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.specialization p {
+  font-size: 1.1rem;
+  color: #555;
+  text-align: justify;
+}
+
+/* Enfoque profesional */
+.professional-approach {
+  margin-bottom: 3rem;
+}
+
+.professional-approach h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.professional-approach p {
+  font-size: 1.1rem;
+  color: #555;
+  text-align: justify;
+  line-height: 1.8;
+}
+
+/* Llamada a la acción */
+.cta {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.cta p {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.cta .btn {
+  background-color: #007bff;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 1rem;
+  margin: 0.5rem;
+}
+
+.cta .btn:hover {
+  background-color: #0056b3;
+}
