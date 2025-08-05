@@ -124,17 +124,15 @@
         <!-- Tiempo de Entrega -->
         <div class="form-field">
           <label for="tiempoEntrega" class="field-label required">Tiempo de Entrega:</label>
-          <p-dropdown
+          <input
             id="tiempoEntrega"
+            type="text"
+            pInputText
             formControlName="tiempoEntrega"
-            [options]="tiemposEntrega"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Seleccionar tiempo"
-            [disabled]="isReadOnly"
+            placeholder="Ej: 15 días calendario, 3 días hábiles, etc."
+            [readonly]="isReadOnly"
             [class.p-invalid]="hasFieldError('tiempoEntrega')"
-            styleClass="w-full">
-          </p-dropdown>
+            class="w-full" />
           <small
             *ngIf="hasFieldError('tiempoEntrega', 'required')"
             class="p-error">
@@ -356,12 +354,22 @@
         </div>
       </div>
 
-      <!-- Total General -->
+      <!-- Resumen Financiero -->
       <p-divider></p-divider>
       <div class="total-section">
-        <div class="total-row">
-          <span class="total-label">Total General:</span>
-          <span class="total-value">{{ totalGeneralFormateado }}</span>
+        <div class="totals-grid">
+          <div class="total-row">
+            <span class="total-label">Subtotal:</span>
+            <span class="total-value">{{ subtotalFormateado }}</span>
+          </div>
+          <div class="total-row">
+            <span class="total-label">IGV (18%):</span>
+            <span class="total-value">{{ igvFormateado }}</span>
+          </div>
+          <div class="total-row total-final">
+            <span class="total-label">Total General:</span>
+            <span class="total-value">{{ totalGeneralFormateado }}</span>
+          </div>
         </div>
       </div>
     </p-card>

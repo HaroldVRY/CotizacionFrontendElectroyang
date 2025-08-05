@@ -5,14 +5,14 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
-import { CotizacionService } from '../../../service/cotizacion.service';
+import { CotizacionService } from '../../../../service/cotizacion.service';
 import {
   Cotizacion,
   ItemCotizacion,
   Cliente,
   Servicio,
   CreateCotizacionRequest
-} from '../../../interface/cotizacion.interface';
+} from '../../../../interface/cotizacion.interface';
 
 @Component({
   selector: 'app-detalle-creacion1',
@@ -39,18 +39,11 @@ export class DetalleCreacion1Component implements OnInit, OnDestroy {
 
   // Opciones
   formasPago = [
-    { label: 'Contado', value: 'contado' },
-    { label: '30 días', value: '30_dias' },
-    { label: '60 días', value: '60_dias' },
-    { label: '90 días', value: '90_dias' }
-  ];
-
-  tiemposEntrega = [
-    { label: '24 horas', value: '24_horas' },
-    { label: '3 días', value: '3_dias' },
-    { label: '1 semana', value: '1_semana' },
-    { label: '2 semanas', value: '2_semanas' },
-    { label: '1 mes', value: '1_mes' }
+    { label: 'Contado', value: 'Contado' },
+    { label: 'Transferencia bancaria', value: 'Transferencia bancaria' },
+    { label: 'Pago contra entrega', value: 'Pago contra entrega' },
+    { label: 'Efectivo', value: 'Efectivo' },
+    { label: 'Crédito 30 días', value: 'Crédito 30 días' }
   ];
 
   private destroy$ = new Subject<void>();
@@ -233,27 +226,43 @@ export class DetalleCreacion1Component implements OnInit, OnDestroy {
     this.cotizacionForm.patchValue({
       numero: numero,
       fecha: new Date(cotizacion.fecha),
-      cliente: cotizacion.cliente,
+      cliente: cotizacion.cliente || cotizacion.clienteNombre,
       receptor: cotizacion.receptor,
       observaciones: cotizacion.observaciones || '',
       tiempoEntrega: cotizacion.tiempoEntrega,
       formaPago: cotizacion.formaPago,
-      mostrarDatosBancarios: !!cotizacion.banco,
-      banco: cotizacion.banco || {}
+      mostrarDatosBancarios: true, // Mostrar datos bancarios por defecto
+      banco: cotizacion.banco || {
+        nombre: 'Banco de Crédito del Perú',
+        cuentaCorriente: '000-123456789',
+        cuentaInterbancaria: '018-000-123456789-01'
+      }
     });
 
-    // Cargar items
-    cotizacion.items.forEach(item => {
-      this.agregarItem(item);
+    // Cargar items (usar detalles si están disponibles, sino items)
+    const itemsACargar = cotizacion.items || cotizacion.detalles || [];
+    itemsACargar.forEach(item => {
+      // Convertir item del backend al formato del formulario
+      const itemFormulario: Partial<ItemCotizacion> = {
+        numeroItem: item.numeroItem,
+        cantidad: item.cantidadNumeric || this.convertirANumero(item.cantidad),
+        descripcion: item.descripcion,
+        precioUnitario: item.precioUnitarioNumeric || this.convertirANumero(item.precioUnitario),
+        total: item.totalNumeric || this.convertirANumero(item.total)
+      };
+      this.agregarItem(itemFormulario as ItemCotizacion);
     });
+
+    // Si no hay items, agregar uno vacío
+    if (itemsACargar.length === 0) {
+      this.agregarItem();
+    }
 
     // Deshabilitar formulario si es modo ver
     if (this.modo === 'ver') {
       this.cotizacionForm.disable();
     }
-  }
-
-  // ===== GESTIÓN DE ITEMS =====
+  }  // ===== GESTIÓN DE ITEMS =====
 
   get itemsFormArray(): FormArray {
     return this.cotizacionForm.get('items') as FormArray;
@@ -337,10 +346,38 @@ export class DetalleCreacion1Component implements OnInit, OnDestroy {
   }
 
   /**
-   * Obtener total general
+   * Obtener subtotal (sin IGV)
+   */
+  get subtotal(): number {
+    return this.cotizacionService.calcularTotalCotizacion(this.itemsFormArray.value);
+  }
+
+  /**
+   * Obtener IGV (18%)
+   */
+  get igv(): number {
+    return this.subtotal * 0.18;
+  }
+
+  /**
+   * Obtener total general (subtotal + IGV)
    */
   get totalGeneral(): number {
-    return this.cotizacionService.calcularTotalCotizacion(this.itemsFormArray.value);
+    return this.subtotal + this.igv;
+  }
+
+  /**
+   * Obtener subtotal formateado
+   */
+  get subtotalFormateado(): string {
+    return this.cotizacionService.formatearPrecio(this.subtotal);
+  }
+
+  /**
+   * Obtener IGV formateado
+   */
+  get igvFormateado(): string {
+    return this.cotizacionService.formatearPrecio(this.igv);
   }
 
   /**
@@ -456,6 +493,18 @@ export class DetalleCreacion1Component implements OnInit, OnDestroy {
   }
 
   // ===== UTILIDADES =====
+
+  /**
+   * Convertir string a número
+   */
+  private convertirANumero(valor: string | number): number {
+    if (typeof valor === 'number') return valor;
+    if (typeof valor === 'string') {
+      const numero = parseFloat(valor);
+      return isNaN(numero) ? 0 : numero;
+    }
+    return 0;
+  }
 
   /**
    * Marcar todos los controles como tocados

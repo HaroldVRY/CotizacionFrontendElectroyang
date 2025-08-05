@@ -252,6 +252,129 @@
   padding: 1.5rem;
 }
 
+/* ===== FILTROS AVANZADOS ===== */
+
+/* Caption con filtros */
+.filter-caption-container {
+  width: 100%;
+  display: flex;
+  padding: 16px 24px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+/* Información de filtros */
+.filter-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: #e3f2fd;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+}
+
+.filter-info i {
+  color: #1976d2;
+  font-size: 12px;
+}
+
+/* Filtros por columna */
+.filtro-columna-input {
+  padding: 6px 8px !important;
+  font-size: 12px !important;
+  text-align: center !important;
+  border-radius: 6px !important;
+  border: 1px solid #ced4da !important;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+}
+
+.filtro-columna-input:focus {
+  border-color: #4fc3f7 !important;
+  box-shadow: 0 0 0 0.2rem rgba(79, 195, 247, 0.25) !important;
+}
+
+.filtro {
+  background-color: #f8f9fa !important;
+}
+
+.filtro.d-none {
+  display: none !important;
+}
+
+/* Estilos específicos para botones en la tabla */
+.filter-caption-container ::ng-deep .p-button {
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.filter-caption-container ::ng-deep .p-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.filter-caption-container ::ng-deep .p-button-info {
+  background: transparent !important;
+  color: #4fc3f7 !important;
+  border: 1px solid #4fc3f7 !important;
+}
+
+.filter-caption-container ::ng-deep .p-button-info:hover {
+  background: #29b6f6 !important;
+  color: white !important;
+  border: 1px solid #29b6f6 !important;
+  transform: translateY(-1px) !important;
+  background: linear-gradient(135deg, #29b6f6 0%, #0288d1 100%);
+}
+
+.filter-caption-container ::ng-deep .p-button-outlined.p-button-danger {
+  background: transparent !important;
+  color: #f44336 !important;
+  border: 1px solid #f44336 !important;
+}
+
+.filter-caption-container ::ng-deep .p-button-outlined.p-button-danger:hover {
+  background: #f44336 !important;
+  color: white !important;
+  border: 1px solid #f44336 !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Campos de filtro pequeños */
+::ng-deep .filtro .p-calendar,
+::ng-deep .filtro .p-dropdown {
+  font-size: 12px !important;
+}
+
+::ng-deep .filtro .p-calendar .p-inputtext,
+::ng-deep .filtro .p-dropdown .p-dropdown-label {
+  padding: 6px 8px !important;
+  font-size: 12px !important;
+  text-align: center !important;
+}
+
+/* Clases de utilidad */
+.d-flex {
+  display: flex;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
 /* Primary colors */
 .text-primary {
   color: #3b82f6 !important;

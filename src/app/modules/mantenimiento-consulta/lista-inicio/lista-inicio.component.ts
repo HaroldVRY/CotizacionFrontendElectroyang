@@ -16,12 +16,26 @@ import { Cotizacion, PaginatedResponse } from '../../../interface/cotizacion.int
 export class ListaInicioComponent implements OnInit, OnDestroy {
   // Datos y paginación
   cotizaciones: Cotizacion[] = [];
+  cotizacionesFiltradas: Cotizacion[] = [];
   totalRecords = 0;
   loading = false;
   first = 0;
   rows = 10;
 
-  // Filtros
+  // Control de filtros
+  filtrosVisibles = false;
+
+  // Filtros por columna
+  filtroNumero = '';
+  filtroFecha: Date | null = null;
+  filtroCliente = '';
+  filtroReceptor = '';
+  filtroEstado = '';
+
+  // Búsqueda global
+  filtroGlobal = '';
+
+  // Filtros originales (para compatibilidad con paginación del servidor)
   filters = {
     estado: '',
     cliente: '',
@@ -33,6 +47,7 @@ export class ListaInicioComponent implements OnInit, OnDestroy {
   estadoOptions = [
     { label: 'Todos', value: '' },
     { label: 'Borrador', value: 'borrador' },
+    { label: 'Enviada', value: 'enviada' },
     { label: 'Aprobada', value: 'aprobada' },
     { label: 'Rechazada', value: 'rechazada' }
   ];
@@ -79,21 +94,15 @@ export class ListaInicioComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Cargar cotizaciones con paginación
+   * Cargar cotizaciones - ahora carga todas las cotizaciones para filtrado local
    */
   loadCotizaciones(event?: any): void {
     this.loading = true;
 
-    let page = 1;
-    if (event) {
-      page = Math.floor(event.first / event.rows) + 1;
-      this.rows = event.rows;
-      this.first = event.first;
-    }
-
+    // Para filtrado local, cargamos todas las cotizaciones
     const cleanFilters = this.getCleanFilters();
 
-    this.cotizacionService.getCotizaciones(page, this.rows, cleanFilters)
+    this.cotizacionService.getCotizaciones(1, 1000, cleanFilters) // Cargar hasta 1000 registros
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => this.loading = false)
@@ -102,35 +111,22 @@ export class ListaInicioComponent implements OnInit, OnDestroy {
         next: (response: PaginatedResponse<Cotizacion>) => {
           this.cotizaciones = response.data.map(cotizacion => ({
             ...cotizacion,
-            precioTotalFormatted: this.cotizacionService.formatearPrecio(cotizacion.precioTotal || 0)
+            // Asegurarse de que los campos estén formateados
+            precioTotalFormatted: cotizacion.precioTotalFormatted ||
+              this.cotizacionService.formatearPrecio(cotizacion.totalNumeric || 0),
+            cliente: cotizacion.cliente || cotizacion.clienteNombre,
+            fechaFormatted: cotizacion.fechaFormatted || this.formatearFecha(cotizacion.fecha)
           }));
-          this.totalRecords = response.total;
+          this.cotizacionesFiltradas = [...this.cotizaciones];
+          this.totalRecords = this.cotizaciones.length;
+
+          // Aplicar filtros locales si existen
+          this.aplicarFiltrosLocales();
         },
         error: (error) => {
           console.error('Error al cargar cotizaciones:', error);
         }
       });
-  }
-
-  /**
-   * Aplicar filtros
-   */
-  applyFilters(): void {
-    this.first = 0; // Resetear a la primera página
-    this.loadCotizaciones();
-  }
-
-  /**
-   * Limpiar filtros
-   */
-  clearFilters(): void {
-    this.filters = {
-      estado: '',
-      cliente: '',
-      fechaInicio: '',
-      fechaFin: ''
-    };
-    this.applyFilters();
   }
 
   /**
@@ -153,14 +149,14 @@ export class ListaInicioComponent implements OnInit, OnDestroy {
    * Crear nueva cotización
    */
   nuevaCotizacion(): void {
-    this.router.navigate(['/creacion-cotizacion/detalle-creacion1']);
+    this.router.navigate(['/mantenimiento-consulta/detalle-creacion1']);
   }
 
   /**
    * Ver detalle de cotización
    */
   verDetalle(cotizacion: Cotizacion): void {
-    this.router.navigate(['/creacion-cotizacion/detalle-creacion1'], {
+    this.router.navigate(['/mantenimiento-consulta/detalle-creacion1'], {
       queryParams: { id: cotizacion.id, modo: 'ver' }
     });
   }
@@ -169,7 +165,7 @@ export class ListaInicioComponent implements OnInit, OnDestroy {
    * Editar cotización
    */
   editarCotizacion(cotizacion: Cotizacion): void {
-    this.router.navigate(['/creacion-cotizacion/detalle-creacion1'], {
+    this.router.navigate(['/mantenimiento-consulta/detalle-creacion1'], {
       queryParams: { id: cotizacion.id, modo: 'editar' }
     });
   }
@@ -178,7 +174,7 @@ export class ListaInicioComponent implements OnInit, OnDestroy {
    * Duplicar cotización
    */
   duplicarCotizacion(cotizacion: Cotizacion): void {
-    this.router.navigate(['/creacion-cotizacion/detalle-creacion1'], {
+    this.router.navigate(['/mantenimiento-consulta/detalle-creacion1'], {
       queryParams: { id: cotizacion.id, modo: 'duplicar' }
     });
   }
@@ -285,8 +281,9 @@ export class ListaInicioComponent implements OnInit, OnDestroy {
     switch (estado) {
       case 'aprobada': return 'success';
       case 'rechazada': return 'danger';
+      case 'enviada': return 'info';
       case 'borrador': return 'warning';
-      default: return 'info';
+      default: return 'secondary';
     }
   }
 
@@ -297,6 +294,7 @@ export class ListaInicioComponent implements OnInit, OnDestroy {
     switch (estado) {
       case 'aprobada': return 'Aprobada';
       case 'rechazada': return 'Rechazada';
+      case 'enviada': return 'Enviada';
       case 'borrador': return 'Borrador';
       default: return estado;
     }
@@ -334,5 +332,162 @@ export class ListaInicioComponent implements OnInit, OnDestroy {
    */
   formatearFecha(fecha: string): string {
     return new Date(fecha).toLocaleDateString('es-PE');
+  }
+
+  // ===== MÉTODOS DE FILTRADO AVANZADO =====
+
+  /**
+   * Aplicar filtros locales a los datos
+   */
+  aplicarFiltrosLocales(): void {
+    let datosFiltrados = [...this.cotizaciones];
+
+    // Aplicar filtro global
+    if (this.filtroGlobal && this.filtroGlobal.trim() !== '') {
+      const filtroGlobalLower = this.filtroGlobal.toLowerCase().trim();
+      datosFiltrados = datosFiltrados.filter(cotizacion =>
+        this.busquedaGlobal(cotizacion, filtroGlobalLower)
+      );
+    }
+
+    // Aplicar filtros por columna
+    if (this.filtroNumero && this.filtroNumero.trim() !== '') {
+      const filtro = this.filtroNumero.toLowerCase().trim();
+      datosFiltrados = datosFiltrados.filter(cotizacion =>
+        (cotizacion.numero || '').toLowerCase().includes(filtro)
+      );
+    }
+
+    if (this.filtroCliente && this.filtroCliente.trim() !== '') {
+      const filtro = this.filtroCliente.toLowerCase().trim();
+      datosFiltrados = datosFiltrados.filter(cotizacion =>
+        (cotizacion.cliente || '').toLowerCase().includes(filtro)
+      );
+    }
+
+    if (this.filtroReceptor && this.filtroReceptor.trim() !== '') {
+      const filtro = this.filtroReceptor.toLowerCase().trim();
+      datosFiltrados = datosFiltrados.filter(cotizacion =>
+        (cotizacion.receptor || '').toLowerCase().includes(filtro)
+      );
+    }
+
+    if (this.filtroEstado && this.filtroEstado.trim() !== '') {
+      datosFiltrados = datosFiltrados.filter(cotizacion =>
+        cotizacion.estado === this.filtroEstado
+      );
+    }
+
+    if (this.filtroFecha) {
+      const fechaFiltro = this.filtroFecha.toDateString();
+      datosFiltrados = datosFiltrados.filter(cotizacion => {
+        const fechaCotizacion = new Date(cotizacion.fecha).toDateString();
+        return fechaCotizacion === fechaFiltro;
+      });
+    }
+
+    this.cotizacionesFiltradas = datosFiltrados;
+  }
+
+  /**
+   * Búsqueda global en todos los campos relevantes
+   */
+  private busquedaGlobal(cotizacion: Cotizacion, filtro: string): boolean {
+    const campos = [
+      cotizacion.numero || '',
+      cotizacion.cliente || '',
+      cotizacion.receptor || '',
+      cotizacion.estado || '',
+      cotizacion.observaciones || '',
+      this.formatearFecha(cotizacion.fecha),
+      cotizacion.precioTotalFormatted || ''
+    ];
+
+    return campos.some(campo =>
+      campo.toLowerCase().includes(filtro)
+    );
+  }
+
+  /**
+   * Manejar búsqueda global
+   */
+  onBusquedaGlobal(event: any): void {
+    this.filtroGlobal = event.target.value;
+    this.aplicarFiltrosLocales();
+  }
+
+  /**
+   * Manejar filtro por columna
+   */
+  onFiltroColumna(): void {
+    this.aplicarFiltrosLocales();
+  }
+
+  /**
+   * Manejar eventos de filtrado de la tabla (para compatibilidad)
+   */
+  onTableFilter(event: any): void {
+    // Este método se mantiene para compatibilidad pero no se usa con filtrado local
+  }
+
+  /**
+   * Alternar visibilidad de filtros por columna
+   */
+  toggleFiltros(): void {
+    this.filtrosVisibles = !this.filtrosVisibles;
+    if (!this.filtrosVisibles) {
+      this.limpiarFiltrosColumna();
+    }
+  }
+
+  /**
+   * Limpiar todos los filtros (búsqueda global y por columna)
+   */
+  clear(table: any, searchInput: any): void {
+    // Limpiar búsqueda global
+    this.filtroGlobal = '';
+    if (searchInput) {
+      searchInput.value = '';
+    }
+
+    // Limpiar filtros por columna
+    this.limpiarFiltrosColumna();
+
+    // Limpiar filtros originales
+    this.clearFilters();
+
+    // Aplicar filtros (vacíos)
+    this.aplicarFiltrosLocales();
+  }
+
+  /**
+   * Limpiar filtros por columna
+   */
+  private limpiarFiltrosColumna(): void {
+    this.filtroNumero = '';
+    this.filtroFecha = null;
+    this.filtroCliente = '';
+    this.filtroReceptor = '';
+    this.filtroEstado = '';
+  }
+
+  /**
+   * Aplicar filtros (método original para compatibilidad)
+   */
+  applyFilters(): void {
+    this.first = 0; // Resetear a la primera página
+    this.loadCotizaciones();
+  }
+
+  /**
+   * Limpiar filtros (método original para compatibilidad)
+   */
+  clearFilters(): void {
+    this.filters = {
+      estado: '',
+      cliente: '',
+      fechaInicio: '',
+      fechaFin: ''
+    };
   }
 }

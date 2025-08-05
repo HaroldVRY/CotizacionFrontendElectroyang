@@ -7,9 +7,11 @@ const routes: Routes = [
     path: 'mantenimiento-consulta',
     loadChildren: () => import('./modules/mantenimiento-consulta/mantenimiento-consulta.module').then(m => m.MantenimientoConsultaModule),
   },
-  {
-    path: 'creacion-cotizacion',
-    loadChildren: () => import('./modules/creacion-cotizacion/creacion-cotizacion.module').then(m => m.CreacionCotizacionModule),
+  { path: 'clientes',
+    loadChildren: () => import('./modules/clientes/clientes.module').then(m => m.ClientesModule)
+  },
+  { path: 'servicios',
+    loadChildren: () => import('./modules/servicios/servicios.module').then(m => m.ServiciosModule)
   }
 ];
 

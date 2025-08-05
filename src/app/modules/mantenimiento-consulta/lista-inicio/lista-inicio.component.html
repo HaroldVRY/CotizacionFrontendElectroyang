@@ -1,11 +1,4 @@
-<section id="about-me">
-
-
-
-  <!-- Llamada a la acción: contacto -->
-  <div class="cta">
-    <div class="lista-cotizaciones-container">
-  <!-- Header con título y botón nuevo -->
+<div class="lista-cotizaciones-container">
   <div class="page-header">
     <div class="header-content">
       <h2 class="page-title">
@@ -21,116 +14,143 @@
     </div>
   </div>
 
-  <!-- Panel de filtros -->
-  <div class="filters-panel">
-    <p-card header="Filtros de Búsqueda" styleClass="filters-card">
-      <div class="filters-grid">
-        <!-- Filtro por estado -->
-        <div class="filter-item">
-          <label for="estado">Estado:</label>
-          <p-dropdown
-            id="estado"
-            [(ngModel)]="filters.estado"
-            [options]="estadoOptions"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Seleccionar estado"
-            styleClass="w-full">
-          </p-dropdown>
-        </div>
-
-        <!-- Filtro por cliente -->
-        <div class="filter-item">
-          <label for="cliente">Cliente:</label>
-          <input
-            id="cliente"
-            type="text"
-            pInputText
-            [(ngModel)]="filters.cliente"
-            placeholder="Buscar por cliente"
-            class="w-full" />
-        </div>
-
-        <!-- Filtro fecha inicio -->
-        <div class="filter-item">
-          <label for="fechaInicio">Fecha Inicio:</label>
-          <p-calendar
-            id="fechaInicio"
-            [(ngModel)]="filters.fechaInicio"
-            dateFormat="dd/mm/yy"
-            placeholder="Fecha inicio"
-            styleClass="w-full">
-          </p-calendar>
-        </div>
-
-        <!-- Filtro fecha fin -->
-        <div class="filter-item">
-          <label for="fechaFin">Fecha Fin:</label>
-          <p-calendar
-            id="fechaFin"
-            [(ngModel)]="filters.fechaFin"
-            dateFormat="dd/mm/yy"
-            placeholder="Fecha fin"
-            styleClass="w-full">
-          </p-calendar>
-        </div>
-      </div>
-
-      <!-- Botones de filtros -->
-      <div class="filter-actions">
-        <p-button
-          label="Aplicar Filtros"
-          icon="pi pi-search"
-          (onClick)="applyFilters()"
-          styleClass="mr-2">
-        </p-button>
-        <p-button
-          label="Limpiar"
-          icon="pi pi-times"
-          severity="secondary"
-          (onClick)="clearFilters()">
-        </p-button>
-      </div>
-    </p-card>
-  </div>
 
   <!-- Tabla de cotizaciones -->
   <div class="table-container">
     <p-card styleClass="table-card">
       <p-table
-        [value]="cotizaciones"
+        #dt1
+        [value]="cotizacionesFiltradas"
         [loading]="loading"
         [paginator]="true"
         [rows]="rows"
-        [totalRecords]="totalRecords"
-        [lazy]="true"
-        (onLazyLoad)="loadCotizaciones($event)"
-        [first]="first"
         [rowsPerPageOptions]="[10, 25, 50]"
         [showCurrentPageReport]="true"
         currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
-        styleClass="p-datatable-gridlines">
+        [globalFilterFields]="['numero', 'cliente', 'receptor', 'estado']"
+        styleClass="p-datatable-gridlines"
+        responsiveLayout="scroll"
+        showGridlines>
+
+        <!-- Caption con búsqueda global y filtros -->
+        <ng-template pTemplate="caption">
+          <div class="filter-caption-container justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <p-iconfield iconPosition="left">
+                <p-inputicon>
+                  <i class="pi pi-search"></i>
+                </p-inputicon>
+                <input #searchInput pInputText type="text"
+                       (input)="dt1.filterGlobal(searchInput.value, 'contains'); onTableFilter($event)"
+                       placeholder="Buscar cotización..." />
+              </p-iconfield>
+              <p-button [outlined]="true" [icon]="filtrosVisibles ? 'pi pi-filter-slash' : 'pi pi-filter'"
+                (click)="toggleFiltros()" label="Filtros" severity="info" />
+              <p-button label="Limpiar Filtros" [outlined]="true" icon="pi pi-times"
+                (click)="clear(dt1, searchInput)" severity="danger" />
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="filter-info" *ngIf="cotizacionesFiltradas.length !== cotizaciones.length">
+                <i class="pi pi-filter"></i>
+                {{ cotizacionesFiltradas.length }} de {{ cotizaciones.length }} registros
+              </span>
+            </div>
+          </div>
+        </ng-template>
 
         <!-- Columna Número -->
         <ng-template pTemplate="header">
           <tr>
             <th pSortableColumn="numero">
-              Número <p-sortIcon field="numero"></p-sortIcon>
+              <div class="d-flex gap-1 align-items-center justify-content-center">
+                Número <p-sortIcon field="numero"></p-sortIcon>
+              </div>
             </th>
             <th pSortableColumn="fecha">
-              Fecha <p-sortIcon field="fecha"></p-sortIcon>
+              <div class="d-flex gap-1 align-items-center justify-content-center">
+                Fecha <p-sortIcon field="fecha"></p-sortIcon>
+              </div>
             </th>
             <th pSortableColumn="cliente">
-              Cliente <p-sortIcon field="cliente"></p-sortIcon>
+              <div class="d-flex gap-1 align-items-center justify-content-center">
+                Cliente <p-sortIcon field="cliente"></p-sortIcon>
+              </div>
             </th>
-            <th>Receptor</th>
+            <th>
+              <div class="d-flex gap-1 align-items-center justify-content-center">
+                Receptor
+              </div>
+            </th>
             <th pSortableColumn="estado">
-              Estado <p-sortIcon field="estado"></p-sortIcon>
+              <div class="d-flex gap-1 align-items-center justify-content-center">
+                Estado <p-sortIcon field="estado"></p-sortIcon>
+              </div>
             </th>
             <th pSortableColumn="precioTotal">
-              Total <p-sortIcon field="precioTotal"></p-sortIcon>
+              <div class="d-flex gap-1 align-items-center justify-content-center">
+                Total <p-sortIcon field="precioTotal"></p-sortIcon>
+              </div>
             </th>
-            <th style="width: 200px;">Acciones</th>
+            <th style="width: 200px;">
+              <div class="d-flex gap-1 align-items-center justify-content-center">
+                Acciones
+              </div>
+            </th>
+          </tr>
+
+          <!-- Fila de filtros -->
+          <tr class="filtro" [ngClass]="{'d-none': !filtrosVisibles}">
+            <th>
+              <div class="w-100 p-1">
+                <input type="text" pInputText pSize="small" class="w-100 filtro-columna-input"
+                       [(ngModel)]="filtroNumero"
+                       (input)="onFiltroColumna()"
+                       placeholder="Filtrar Número"/>
+              </div>
+            </th>
+            <th>
+              <div class="w-100 p-1">
+                <p-calendar pSize="small" class="w-100"
+                           [(ngModel)]="filtroFecha"
+                           (onSelect)="onFiltroColumna()"
+                           (onClearClick)="filtroFecha = null; onFiltroColumna()"
+                           dateFormat="dd/mm/yy"
+                           placeholder="Filtrar Fecha"/>
+              </div>
+            </th>
+            <th>
+              <div class="w-100 p-1">
+                <input type="text" pInputText pSize="small" class="w-100 filtro-columna-input"
+                       [(ngModel)]="filtroCliente"
+                       (input)="onFiltroColumna()"
+                       placeholder="Filtrar Cliente"/>
+              </div>
+            </th>
+            <th>
+              <div class="w-100 p-1">
+                <input type="text" pInputText pSize="small" class="w-100 filtro-columna-input"
+                       [(ngModel)]="filtroReceptor"
+                       (input)="onFiltroColumna()"
+                       placeholder="Filtrar Receptor"/>
+              </div>
+            </th>
+            <th>
+              <div class="w-100 p-1">
+                <p-dropdown pSize="small" class="w-100"
+                           [(ngModel)]="filtroEstado"
+                           (onChange)="onFiltroColumna()"
+                           [options]="estadoOptions"
+                           optionLabel="label"
+                           optionValue="value"
+                           placeholder="Filtrar Estado"/>
+              </div>
+            </th>
+            <th>
+              <!-- Sin filtro para la columna Total -->
+            </th>
+            <th>
+              <!-- Sin filtro para la columna Acciones -->
+            </th>
           </tr>
         </ng-template>
 
@@ -172,7 +192,7 @@
                 <p-button
                   *ngIf="cotizacion.estado !== 'aprobada'"
                   icon="pi pi-pencil"
-                  severity="danger"
+                  severity="secondary"
                   size="small"
                   [text]="true"
                   pTooltip="Editar"
@@ -243,5 +263,3 @@
 
 <!-- Dialog de confirmación -->
 <p-confirmDialog></p-confirmDialog>
-  </div>
-</section>

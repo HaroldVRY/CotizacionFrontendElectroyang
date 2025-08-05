@@ -8,43 +8,49 @@ export class MenuService {
 
   items: MenuItem[] = [
     {
-      label: 'Inicio',
-      routerLink: '/lista-inicio',
+      label: 'Cotizaciones',
+      routerLink: '/mantenimiento-consulta/lista-inicio',
       icon: 'pi pi-home',
       iconRef: 'iconInicio'
     },
     {
-      label: 'Mantenimiento y Consulta',
-      icon: 'pi pi-search',
-      iconRef: 'iconConsulta',
-      items: [
-        {
-          label: 'Lista de Cotizaciones',
-          routerLink: '/lista-inicio',
-          icon: 'pi pi-list',
-          iconRef: 'iconLista'
-        }
-      ]
+      label: 'Clientes',
+      routerLink: '/clientes/lista-clientes',
+      icon: 'pi pi-home',
+      iconRef: 'iconInicio'
     },
     {
-      label: 'Creación de Cotización',
-      icon: 'pi pi-plus-circle',
-      iconRef: 'iconCreacion',
-      items: [
-        {
-          label: 'Nueva Cotización',
-          routerLink: '/crear-cotizacion',
-          icon: 'pi pi-file-plus',
-          iconRef: 'iconNueva'
-        },
-        {
-          label: 'Detalle de Creación',
-          routerLink: '/crear-cotizacion/detalle-creacion1',
-          icon: 'pi pi-pencil',
-          iconRef: 'iconDetalle'
-        }
-      ]
-    }
+      label: 'Servicios',
+      routerLink: '/servicios/lista-servicios',
+      icon: 'pi pi-home',
+      iconRef: 'iconInicio'
+    },
+    // {
+    //   label: 'Mantenimiento y Consulta',
+    //   icon: 'pi pi-search',
+    //   iconRef: 'iconConsulta',
+    //   items: [
+    //     {
+    //       label: 'Lista de Cotizaciones',
+    //       routerLink: '/mantenimiento-consulta/lista-inicio',
+    //       icon: 'pi pi-list',
+    //       iconRef: 'iconLista'
+    //     }
+    //   ]
+    // },
+    // {
+    //   label: 'Clientes',
+    //   icon: 'pi pi-plus-circle',
+    //   iconRef: 'iconCreacion',
+    //   items: [
+    //     {
+    //       label: 'Lista de Clientes',
+    //       routerLink: '/mantenimiento-consulta/detalle-creacion1',
+    //       icon: 'pi pi-file-plus',
+    //       iconRef: 'iconNueva'
+    //     }
+    //   ]
+    // }
   ]
 
   getMenuItems(): MenuItem[] {

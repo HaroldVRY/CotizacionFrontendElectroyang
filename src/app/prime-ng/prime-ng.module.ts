@@ -9,6 +9,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { DrawerModule } from 'primeng/drawer';
+import { DropdownModule } from 'primeng/dropdown';
 import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { FieldsetModule } from 'primeng/fieldset';
 import { FileUploadModule } from 'primeng/fileupload';
@@ -30,10 +31,11 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TabsModule } from 'primeng/tabs';
+import { TagModule } from 'primeng/tag';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { ToggleButtonModule } from 'primeng/togglebutton';
-
+import { TooltipModule } from 'primeng/tooltip';
 
 @NgModule({
   exports: [
@@ -45,6 +47,7 @@ import { ToggleButtonModule } from 'primeng/togglebutton';
     ConfirmDialogModule,
     DatePickerModule,
     DialogModule,
+    DropdownModule,
     DynamicDialogModule,
     DrawerModule,
     FieldsetModule,
@@ -67,9 +70,11 @@ import { ToggleButtonModule } from 'primeng/togglebutton';
     SelectModule,
     TableModule,
     TabsModule,
+    TagModule,
     TextareaModule,
     ToastModule,
-    ToggleButtonModule
+    ToggleButtonModule,
+    TooltipModule
   ]
 })
 export class PrimeNgModule { }

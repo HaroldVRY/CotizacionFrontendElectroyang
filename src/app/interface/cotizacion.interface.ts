@@ -1,9 +1,19 @@
 export interface ItemCotizacion {
+  id?: number;
+  cotizacionId?: number;
+  servicioId?: number;
   numeroItem: number;
-  cantidad: number;
+  cantidad: string | number;
   descripcion: string;
-  precioUnitario: number;
-  total?: number;
+  precioUnitario: string | number;
+  total: string | number;
+  createdAt?: string;
+  updatedAt?: string;
+  servicioNombre?: string;
+  // Campos calculados para la vista
+  cantidadNumeric?: number;
+  precioUnitarioNumeric?: number;
+  totalNumeric?: number;
   precioUnitarioFormatted?: string;
   totalFormatted?: string;
 }
@@ -15,23 +25,35 @@ export interface Banco {
 }
 
 export interface Cotizacion {
-  id?: string;
+  id?: number;
   numero: string;
   fecha: string;
-  cliente: string;
+  clienteId?: number;
+  usuarioId?: number;
   receptor: string;
-  items: ItemCotizacion[];
   observaciones?: string;
   tiempoEntrega: string;
   formaPago: string;
+  estado?: 'borrador' | 'enviada' | 'aprobada' | 'rechazada';
+  subtotal: string | number;
+  igv: string | number;
+  total: string | number;
+  createdAt?: string;
+  updatedAt?: string;
+  clienteNombre?: string;
+  usuarioNombre?: string;
+  detalles?: ItemCotizacion[];
   banco?: Banco;
-  estado?: 'borrador' | 'aprobada' | 'rechazada';
-  precioTotal?: number;
+  // Campos calculados para la vista
+  subtotalNumeric?: number;
+  igvNumeric?: number;
+  totalNumeric?: number;
   precioTotalFormatted?: string;
-  precioTotalLetras?: string;
-  mostrarDatosBancarios?: boolean;
-  fechaCreacion?: Date;
-  fechaModificacion?: Date;
+  fechaFormatted?: string;
+  // Para compatibilidad con la vista anterior
+  cliente?: string;
+  items?: ItemCotizacion[];
+  precioTotal?: number;
 }
 
 export interface Cliente {
