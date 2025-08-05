@@ -1,27 +1,247 @@
 <section id="about-me">
 
-  <!-- Especialización en desarrollo web Full Stack -->
-  <div class="specialization">
-    <h2>Lista de Cotizaciones</h2>
-    <p>
-      Me especializo en <strong>desarrollo Full Stack</strong>, donde puedo trabajar tanto en el <strong>frontend</strong> como en el <strong>backend</strong> de las aplicaciones. Me encanta trabajar con tecnologías modernas como <strong>React</strong>, <strong>Node.js</strong>, <strong>Express</strong> y <strong>MongoDB</strong>. Mi experiencia incluye desde la creación de interfaces interactivas hasta la construcción de APIs robustas, asegurando siempre una integración fluida entre ambos lados.
-    </p>
-  </div>
 
-  <!-- Enfoque profesional -->
-  <div class="professional-approach">
-    <h2>Mi Enfoque Profesional</h2>
-    <p>
-      Mi enfoque en el desarrollo web se basa en la <strong>calidad del código</strong>, la <strong>colaboración efectiva</strong> y el <strong>aprendizaje continuo</strong>. Creo que la mejor forma de construir soluciones es entender las necesidades del cliente y de los usuarios. Siempre busco optimizar el rendimiento y la accesibilidad de las aplicaciones, aplicando buenas prácticas de desarrollo y utilizando herramientas que mejoren la experiencia tanto para los usuarios como para los equipos de desarrollo.
-    </p>
-    <p>
-      Lo que me motiva a seguir trabajando en el campo del desarrollo web es la constante evolución del sector y la posibilidad de crear productos que realmente marquen la diferencia. Cada desafío me impulsa a aprender algo nuevo, lo que me permite mejorar como profesional y contribuir al éxito de los proyectos en los que participo.
-    </p>
-  </div>
 
   <!-- Llamada a la acción: contacto -->
   <div class="cta">
-    <p>Si quieres conectar conmigo, no dudes en contactarme:</p>
-    <a href="https://www.linkedin.com/in/harold-victor-reyna-yangali-226379143/" class="btn">LinkedIn</a>
+    <div class="lista-cotizaciones-container">
+  <!-- Header con título y botón nuevo -->
+  <div class="page-header">
+    <div class="header-content">
+      <h2 class="page-title">
+        <i class="pi pi-list mr-2"></i>
+        Lista de Cotizaciones
+      </h2>
+      <p-button
+        label="Nueva Cotización"
+        icon="pi pi-plus"
+        severity="success"
+        (onClick)="nuevaCotizacion()">
+      </p-button>
+    </div>
+  </div>
+
+  <!-- Panel de filtros -->
+  <div class="filters-panel">
+    <p-card header="Filtros de Búsqueda" styleClass="filters-card">
+      <div class="filters-grid">
+        <!-- Filtro por estado -->
+        <div class="filter-item">
+          <label for="estado">Estado:</label>
+          <p-dropdown
+            id="estado"
+            [(ngModel)]="filters.estado"
+            [options]="estadoOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Seleccionar estado"
+            styleClass="w-full">
+          </p-dropdown>
+        </div>
+
+        <!-- Filtro por cliente -->
+        <div class="filter-item">
+          <label for="cliente">Cliente:</label>
+          <input
+            id="cliente"
+            type="text"
+            pInputText
+            [(ngModel)]="filters.cliente"
+            placeholder="Buscar por cliente"
+            class="w-full" />
+        </div>
+
+        <!-- Filtro fecha inicio -->
+        <div class="filter-item">
+          <label for="fechaInicio">Fecha Inicio:</label>
+          <p-calendar
+            id="fechaInicio"
+            [(ngModel)]="filters.fechaInicio"
+            dateFormat="dd/mm/yy"
+            placeholder="Fecha inicio"
+            styleClass="w-full">
+          </p-calendar>
+        </div>
+
+        <!-- Filtro fecha fin -->
+        <div class="filter-item">
+          <label for="fechaFin">Fecha Fin:</label>
+          <p-calendar
+            id="fechaFin"
+            [(ngModel)]="filters.fechaFin"
+            dateFormat="dd/mm/yy"
+            placeholder="Fecha fin"
+            styleClass="w-full">
+          </p-calendar>
+        </div>
+      </div>
+
+      <!-- Botones de filtros -->
+      <div class="filter-actions">
+        <p-button
+          label="Aplicar Filtros"
+          icon="pi pi-search"
+          (onClick)="applyFilters()"
+          styleClass="mr-2">
+        </p-button>
+        <p-button
+          label="Limpiar"
+          icon="pi pi-times"
+          severity="secondary"
+          (onClick)="clearFilters()">
+        </p-button>
+      </div>
+    </p-card>
+  </div>
+
+  <!-- Tabla de cotizaciones -->
+  <div class="table-container">
+    <p-card styleClass="table-card">
+      <p-table
+        [value]="cotizaciones"
+        [loading]="loading"
+        [paginator]="true"
+        [rows]="rows"
+        [totalRecords]="totalRecords"
+        [lazy]="true"
+        (onLazyLoad)="loadCotizaciones($event)"
+        [first]="first"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+        styleClass="p-datatable-gridlines">
+
+        <!-- Columna Número -->
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="numero">
+              Número <p-sortIcon field="numero"></p-sortIcon>
+            </th>
+            <th pSortableColumn="fecha">
+              Fecha <p-sortIcon field="fecha"></p-sortIcon>
+            </th>
+            <th pSortableColumn="cliente">
+              Cliente <p-sortIcon field="cliente"></p-sortIcon>
+            </th>
+            <th>Receptor</th>
+            <th pSortableColumn="estado">
+              Estado <p-sortIcon field="estado"></p-sortIcon>
+            </th>
+            <th pSortableColumn="precioTotal">
+              Total <p-sortIcon field="precioTotal"></p-sortIcon>
+            </th>
+            <th style="width: 200px;">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <!-- Cuerpo de la tabla -->
+        <ng-template pTemplate="body" let-cotizacion>
+          <tr>
+            <td>
+              <span class="font-medium text-primary">
+                {{ cotizacion.numero }}
+              </span>
+            </td>
+            <td>{{ formatearFecha(cotizacion.fecha) }}</td>
+            <td>{{ cotizacion.cliente }}</td>
+            <td>{{ cotizacion.receptor }}</td>
+            <td>
+              <p-tag
+                [value]="getEstadoLabel(cotizacion.estado || 'borrador')"
+                [severity]="getEstadoSeverity(cotizacion.estado || 'borrador')">
+              </p-tag>
+            </td>
+            <td>
+              <span class="font-medium">
+                {{ cotizacion.precioTotalFormatted || 'S/ 0.00' }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <!-- Botón Ver -->
+                <p-button
+                  icon="pi pi-eye"
+                  severity="info"
+                  size="small"
+                  [text]="true"
+                  pTooltip="Ver detalle"
+                  (onClick)="verDetalle(cotizacion)">
+                </p-button>
+
+                <!-- Botón Editar (solo si no está aprobada) -->
+                <p-button
+                  *ngIf="cotizacion.estado !== 'aprobada'"
+                  icon="pi pi-pencil"
+                  severity="danger"
+                  size="small"
+                  [text]="true"
+                  pTooltip="Editar"
+                  (onClick)="editarCotizacion(cotizacion)">
+                </p-button>
+
+                <!-- Botón Duplicar -->
+                <p-button
+                  icon="pi pi-copy"
+                  severity="secondary"
+                  size="small"
+                  [text]="true"
+                  pTooltip="Duplicar"
+                  (onClick)="duplicarCotizacion(cotizacion)">
+                </p-button>
+
+                <!-- Botón PDF -->
+                <p-button
+                  icon="pi pi-file-pdf"
+                  severity="danger"
+                  size="small"
+                  [text]="true"
+                  pTooltip="Generar PDF"
+                  (onClick)="generarReporte(cotizacion)">
+                </p-button>
+
+                <!-- Menú de más acciones -->
+                <p-menu #menuRef [model]="getMenuItems(cotizacion)" [popup]="true"></p-menu>
+
+                <p-button
+                  icon="pi pi-ellipsis-v"
+                  severity="secondary"
+                  size="small"
+                  [text]="true"
+                  pTooltip="Más acciones"
+                  (onClick)="menuRef.toggle($event)">
+                </p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <!-- Mensaje cuando no hay datos -->
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="text-center p-4">
+              <div class="empty-state">
+                <i class="pi pi-inbox text-4xl text-gray-400 mb-3"></i>
+                <p class="text-gray-600">No se encontraron cotizaciones</p>
+                <p-button
+                  label="Crear Primera Cotización"
+                  icon="pi pi-plus"
+                  severity="success"
+                  size="small"
+                  (onClick)="nuevaCotizacion()">
+                </p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  </div>
+</div>
+
+<!-- Toast para mensajes -->
+<p-toast></p-toast>
+
+<!-- Dialog de confirmación -->
+<p-confirmDialog></p-confirmDialog>
   </div>
 </section>

@@ -1,26 +1,11 @@
-<div class="sidebar">
+<div class="sidebar-container" *ngIf="open">
   <div class="sidebar-header">
-    <h3>Cotizaciones</h3>
+    <h3 class="titulo">{{ titulo }}</h3>
   </div>
-  <ul class="sidebar-list">
-    <li *ngFor="let item of menuItems">
-      <a *ngIf="item.ruta !== null; else noLink" [routerLink]="item.ruta" routerLinkActive="active">
-        <i class="{{ item.iconRef }}"></i>
-        {{ item.nombre }}
-      </a>
-      <ng-template #noLink>
-        <span><i class="{{ item.iconRef }}"></i> {{ item.nombre }}</span>
-      </ng-template>
 
-      <ng-template #end>
-    <div class="d-flex items-center gap-2">
-      <!-- Botón sin acción -->
-      <p-button label="Login" severity="contrast" size="small"></p-button>
-      <!-- Avatar sin acción -->
-      <p-avatar image="https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png"
-        [style]="{ width: '32px', height: '32px' }"></p-avatar>
-    </div>
-  </ng-template>
-    </li>
-  </ul>
+  <p-panelMenu
+    [model]="menuItems"
+    [styleClass]="'sidebar-menu'"
+    [multiple]="false">
+  </p-panelMenu>
 </div>

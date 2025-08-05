@@ -1,0 +1,22 @@
+<a (click)="toggleExpansion()"
+   class="menu-link"
+   [class.has-children]="item.items && item.items.length > 0"
+   [class.clickable]="item.routerLink || (item.items && item.items.length > 0)">
+  <i [class]="item.icon" class="menu-icon"></i>
+  <span class="menu-label">{{ item.label }}</span>
+  <!-- Icono que rota según si está expandido o no -->
+  <ng-container *ngIf="item.items && item.items.length > 0">
+    <i
+      class="pi pi-chevron-down expand-icon"
+      [ngClass]="{ 'expanded': isExpanded }"
+    ></i>
+  </ng-container>
+</a>
+
+<!-- Submenu with smooth animation -->
+<ul class="submenu" [ngClass]="{ 'expanded': isExpanded }" *ngIf="item.items && item.items.length > 0">
+  <li *ngFor="let subItem of item.items" class="submenu-item">
+    <!-- Llamada recursiva para submenús -->
+    <app-toolbar-item [item]="subItem" [depth]="depth + 1"></app-toolbar-item>
+  </li>
+</ul>

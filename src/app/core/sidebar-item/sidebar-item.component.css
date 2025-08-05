@@ -1,0 +1,199 @@
+/* Estilos para elementos principales (horizontal layout) */
+.menu-link {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  color: #ecf0f1;
+  text-decoration: none;
+  border-radius: 12px;
+  margin: 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  font-weight: 500;
+  background-color: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-height: 50px;
+  white-space: nowrap;
+}
+
+.menu-link:hover {
+  background-color: #3498db;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+}
+
+.menu-link.has-children:hover {
+  background-color: #e74c3c;
+}
+
+.menu-icon {
+  font-size: 1.4em;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  margin-right: 8px;
+}
+
+.menu-label {
+  font-size: 0.9em;
+  text-align: center;
+  line-height: 1.2;
+  font-weight: 600;
+  color: #ecf0f1;
+  transition: color 0.3s ease;
+}
+
+.menu-link:hover .menu-label {
+  color: #ffffff;
+}
+
+.expand-icon {
+  margin-left: 8px;
+  font-size: 0.8em;
+  transition: transform 0.3s ease;
+  color: #95a5a6;
+}
+
+.expand-icon.expanded {
+  transform: rotate(180deg);
+  color: #ffffff;
+}
+
+/* Estilos para submenús - se expanden hacia abajo */
+.submenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  min-width: 220px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  z-index: 2000;
+  margin-top: 10px;
+}
+
+.submenu.expanded {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.submenu-item {
+  margin: 0;
+}
+
+/* Estilos para elementos de submenú */
+.submenu-item .menu-link {
+  flex-direction: row;
+  padding: 12px 16px;
+  margin: 4px 8px;
+  min-height: 40px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.submenu-item .menu-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.submenu-item .menu-icon {
+  font-size: 1.1em;
+  margin-right: 12px;
+  width: 20px;
+  text-align: center;
+}
+
+.submenu-item .menu-label {
+  font-size: 0.9em;
+  font-weight: 500;
+  color: #ecf0f1;
+  flex: 1;
+  text-align: left;
+}
+
+/* Efectos adicionales para profundidad */
+.submenu .submenu {
+  top: 0;
+  left: 100%;
+  background: linear-gradient(135deg, #34495e 0%, #2980b9 100%);
+}
+
+/* Animación de aparición escalonada */
+@keyframes slideInSubmenu {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.submenu.expanded .submenu-item {
+  animation: slideInSubmenu 0.3s ease forwards;
+}
+
+.submenu.expanded .submenu-item:nth-child(1) { animation-delay: 0.1s; }
+.submenu.expanded .submenu-item:nth-child(2) { animation-delay: 0.15s; }
+.submenu.expanded .submenu-item:nth-child(3) { animation-delay: 0.2s; }
+.submenu.expanded .submenu-item:nth-child(4) { animation-delay: 0.25s; }
+
+/* Estados activos */
+.menu-link.active {
+  background-color: #3498db;
+  color: #ffffff;
+  box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+  transform: translateY(-2px);
+}
+
+.menu-link.active .menu-icon,
+.menu-link.active .menu-label {
+  color: #ffffff;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .menu-link {
+    flex-direction: row;
+    padding: 12px;
+    min-height: 48px;
+  }
+
+  .menu-icon {
+    font-size: 1.3em;
+    margin-right: 8px;
+    margin-bottom: 0;
+  }
+
+  .menu-label {
+    font-size: 0.9em;
+    text-transform: none;
+  }
+
+  .submenu {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    min-width: auto;
+    border-radius: 0;
+  }
+}

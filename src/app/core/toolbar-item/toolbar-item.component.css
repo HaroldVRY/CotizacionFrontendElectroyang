@@ -1,0 +1,166 @@
+/* Estilos para elementos principales (horizontal layout en toolbar) */
+.menu-link {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  color: #2c3e50;
+  text-decoration: none;
+  border-radius: 8px;
+  margin: 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  font-weight: 500;
+  background-color: rgba(52, 152, 219, 0.1);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+  white-space: nowrap;
+}
+
+.menu-link:hover {
+  background-color: #3498db;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.menu-link.has-children:hover {
+  background-color: #e74c3c;
+}
+
+.menu-icon {
+  font-size: 1.2em;
+  color: #3498db;
+  transition: all 0.3s ease;
+  margin-right: 6px;
+}
+
+.menu-link:hover .menu-icon {
+  color: #ffffff;
+}
+
+.menu-label {
+  font-size: 0.9em;
+  line-height: 1.2;
+  font-weight: 600;
+  color: #2c3e50;
+  transition: color 0.3s ease;
+}
+
+.menu-link:hover .menu-label {
+  color: #ffffff;
+}
+
+.expand-icon {
+  margin-left: 6px;
+  font-size: 0.7em;
+  transition: transform 0.3s ease;
+  color: #7f8c8d;
+}
+
+.expand-icon.expanded {
+  transform: rotate(180deg);
+  color: #ffffff;
+}
+
+/* Estilos para submenús - se expanden hacia abajo */
+.submenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  list-style: none;
+  padding: 8px 0;
+  margin: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  z-index: 2000;
+  margin-top: 8px;
+}
+
+.submenu.expanded {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.submenu-item {
+  margin: 0;
+}
+
+/* Estilos para elementos de submenú */
+.submenu-item .menu-link {
+  padding: 10px 16px;
+  margin: 2px 8px;
+  background-color: rgba(52, 152, 219, 0.05);
+  border-radius: 6px;
+  border: none;
+}
+
+.submenu-item .menu-link:hover {
+  background-color: #3498db;
+  transform: translateX(4px);
+  box-shadow: 0 2px 10px rgba(52, 152, 219, 0.2);
+}
+
+.submenu-item .menu-icon {
+  font-size: 1em;
+  margin-right: 10px;
+  color: #3498db;
+}
+
+.submenu-item .menu-link:hover .menu-icon {
+  color: #ffffff;
+}
+
+.submenu-item .menu-label {
+  font-size: 0.85em;
+  font-weight: 500;
+  color: #2c3e50;
+  flex: 1;
+  text-align: left;
+}
+
+.submenu-item .menu-link:hover .menu-label {
+  color: #ffffff;
+}
+
+/* Animación de aparición escalonada */
+@keyframes slideInSubmenu {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.submenu.expanded .submenu-item {
+  animation: slideInSubmenu 0.2s ease forwards;
+}
+
+.submenu.expanded .submenu-item:nth-child(1) { animation-delay: 0.05s; }
+.submenu.expanded .submenu-item:nth-child(2) { animation-delay: 0.1s; }
+.submenu.expanded .submenu-item:nth-child(3) { animation-delay: 0.15s; }
+.submenu.expanded .submenu-item:nth-child(4) { animation-delay: 0.2s; }
+
+/* Estados activos */
+.menu-link.active {
+  background-color: #3498db;
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.menu-link.active .menu-icon,
+.menu-link.active .menu-label {
+  color: #ffffff;
+}

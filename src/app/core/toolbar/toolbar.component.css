@@ -9,3 +9,24 @@
 .gap-2 {
   gap: 10px;
 }
+
+.horizontal-menu-container {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  margin-left: 20px;
+}
+
+.horizontal-menu {
+  display: flex;
+  flex-direction: row;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 20px;
+  align-items: center;
+}
+
+.horizontal-menu-item {
+  position: relative;
+}

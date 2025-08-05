@@ -1,53 +1,155 @@
-.sidebar {
+.sidebar-container {
   position: fixed;
   top: 0;
   left: 0;
-  width: 250px;  /* Ajusta el tamaño del sidebar */
-  height: 100%;
-  background-color: #2c3e50;
-  padding: 20px;
-  color: white;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  z-index: 1000; /* Asegura que el sidebar esté por encima de otros elementos */
+  width: 280px;
+  height: 100vh;
+  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidebar-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-container::-webkit-scrollbar-track {
+  background: #2c3e50;
+}
+
+.sidebar-container::-webkit-scrollbar-thumb {
+  background: #3498db;
+  border-radius: 3px;
+}
+
+.sidebar-container::-webkit-scrollbar-thumb:hover {
+  background: #2980b9;
 }
 
 .sidebar-header {
-  margin-bottom: 20px;
-}
-
-.sidebar-header h3 {
-  color: white;
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(236, 240, 241, 0.1);
+  background-color: rgba(52, 73, 94, 0.8);
   text-align: center;
-  font-size: 1.5em;
 }
 
-.sidebar-list {
-  list-style-type: none;
-  padding: 0;
+.titulo {
+  font-size: 1.4em;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.5px;
+  margin: 0;
 }
 
-.sidebar-list li {
-  margin: 15px 0;
+/* Estilos personalizados para PrimeNG PanelMenu */
+:host ::ng-deep .sidebar-menu {
+  border: none;
+  background: transparent;
 }
 
-.sidebar-list a {
+:host ::ng-deep .sidebar-menu .p-panelmenu-panel {
+  border: none;
+  background: transparent;
+  margin-bottom: 8px;
+}
+
+:host ::ng-deep .sidebar-menu .p-panelmenu-header {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  margin: 8px 16px;
+  transition: all 0.3s ease;
+}
+
+:host ::ng-deep .sidebar-menu .p-panelmenu-header:hover {
+  background: #3498db;
+  transform: translateX(4px);
+}
+
+:host ::ng-deep .sidebar-menu .p-panelmenu-header-link {
+  color: #ecf0f1;
+  padding: 12px 16px;
   text-decoration: none;
-  color: white;
-  display: flex;
-  align-items: center;
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+:host ::ng-deep .sidebar-menu .p-panelmenu-header-link:hover {
+  color: #ffffff;
+}
+
+:host ::ng-deep .sidebar-menu .p-panelmenu-header-icon {
+  color: #bdc3c7;
   font-size: 1.1em;
+  margin-right: 12px;
 }
 
-.sidebar-list a:hover {
-  background-color: #34495e;
-  padding-left: 10px;
+:host ::ng-deep .sidebar-menu .p-panelmenu-header-link:hover .p-panelmenu-header-icon {
+  color: #ffffff;
 }
 
-.sidebar-list i {
+:host ::ng-deep .sidebar-menu .p-panelmenu-content {
+  background: rgba(44, 62, 80, 0.5);
+  border: none;
+  border-left: 3px solid #3498db;
+  margin-left: 20px;
+  border-radius: 0 8px 8px 0;
+}
+
+:host ::ng-deep .sidebar-menu .p-panelmenu-content .p-panelmenu-root-list {
+  padding: 8px 0;
+}
+
+:host ::ng-deep .sidebar-menu .p-panelmenu-content .p-menuitem {
+  margin: 2px 0;
+}
+
+:host ::ng-deep .sidebar-menu .p-panelmenu-content .p-menuitem-link {
+  color: #ecf0f1;
+  padding: 10px 16px 10px 24px;
+  background-color: transparent;
+  border-radius: 0 6px 6px 0;
+  transition: all 0.3s ease;
+}
+
+:host ::ng-deep .sidebar-menu .p-panelmenu-content .p-menuitem-link:hover {
+  background-color: #2c3e50;
+  color: #ffffff;
+  transform: translateX(6px);
+}
+
+:host ::ng-deep .sidebar-menu .p-panelmenu-content .p-menuitem-icon {
+  color: #95a5a6;
+  font-size: 0.9em;
   margin-right: 10px;
-  font-size: 1.3em;
 }
 
-.active {
-  background-color: #34495e;
+:host ::ng-deep .sidebar-menu .p-panelmenu-content .p-menuitem-link:hover .p-menuitem-icon {
+  color: #ffffff;
+}
+
+:host ::ng-deep .sidebar-menu .p-panelmenu-content .p-menuitem-text {
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+/* Animación suave para la expansión */
+:host ::ng-deep .sidebar-menu .p-toggleable-content {
+  transition: all 0.4s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar-container {
+    width: 250px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-container.open {
+    transform: translateX(0);
+  }
 }

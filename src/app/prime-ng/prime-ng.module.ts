@@ -23,6 +23,7 @@ import { MenuModule } from 'primeng/menu';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { PaginatorModule } from 'primeng/paginator';
+import { PanelMenuModule } from 'primeng/panelmenu';
 import { PasswordModule } from 'primeng/password';
 import { PopoverModule } from 'primeng/popover';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -59,6 +60,7 @@ import { ToggleButtonModule } from 'primeng/togglebutton';
     MultiSelectModule,
     OverlayPanelModule,
     PaginatorModule,
+    PanelMenuModule,
     PasswordModule,
     PopoverModule,
     ProgressSpinnerModule,

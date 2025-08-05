@@ -1,9 +1,10 @@
-<app-sidebar *ngIf="isSidebarVisible" class="sidebar"></app-sidebar> <!-- Sidebar fijo, siempre visible -->
+<app-sidebar *ngIf="isSidebarVisible" class="sidebar"></app-sidebar>
 <app-toolbar [isSidebarVisible]="isSidebarVisible"></app-toolbar>
 <!-- Usamos ngStyle para cambiar el margin-left dinámicamente según la visibilidad del sidebar -->
-<div class="content" [ngStyle]="{'margin-left': isSidebarVisible ? '250px' : '0'}">
-
+<div class="content" [ngStyle]="{'margin-left': isSidebarVisible ? '280px' : '0'}">
 
   <!-- Este es el contenido que se muestra debajo del sidebar y el toolbar -->
   <router-outlet></router-outlet> <!-- Aquí se cargan las vistas según las rutas -->
+  <app-footer class="w-100"></app-footer>
+
 </div>

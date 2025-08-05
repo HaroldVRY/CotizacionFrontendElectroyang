@@ -1,7 +1,6 @@
 /* Estilos para el contenido principal */
 .content {
   transition: margin-left 0.3s ease; /* Transición suave para el cambio de margen */
-  padding: 20px;
 }
 
 /* Para pantallas pequeñas (responsive), asegurarse de que el content ocupe todo el espacio disponible */

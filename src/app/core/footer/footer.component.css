@@ -1,0 +1,95 @@
+/* footer.component.css */
+.footer {
+  background-color: #000000; /* Fondo negro para el footer */
+  color: white; /* Texto blanco */
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr repeat(4, 1fr) 1fr; /* 6 columnas: 1 vacía a la izquierda, 4 centrales con contenido, 1 vacía a la derecha */
+  gap: 2rem; /* Espacio entre las columnas */
+}
+
+.space-y-4 {
+  margin-bottom: 1rem; /* Separación entre elementos dentro de cada columna */
+}
+
+.text-sm {
+  font-size: 0.875rem; /* Texto de tamaño más pequeño */
+}
+
+.text-base {
+  font-size: 1rem; /* Tamaño base para los textos (para títulos o párrafos generales) */
+}
+
+.text-lg {
+  font-size: 1.125rem; /* Títulos más grandes */
+}
+
+.text-blue-300 {
+  color: #93c5fd; /* Azul claro para los títulos */
+}
+
+.text-gray-400 {
+  color: #d1d5db; /* Gris claro para el texto */
+}
+
+.bg-blue-800 {
+  background-color: #2b6cb0; /* Azul oscuro para las etiquetas SEO */
+  color: white; /* Texto blanco dentro de las etiquetas SEO */
+}
+
+.border-t {
+  border-top: 1px solid #4b5563; /* Borde gris oscuro */
+}
+
+.mt-8 {
+  margin-top: 2rem; /* Margen superior para el separador */
+}
+
+.pt-8 {
+  padding-top: 2rem; /* Padding superior para el separador */
+}
+
+.text-center {
+  text-align: center; /* Centrado del texto en el pie de página */
+}
+
+/* Establecer el ancho del separador a las 4 columnas centrales */
+.footer-separator {
+  grid-column: 2 / span 4; /* Inicia en la columna 2 y ocupa 4 columnas */
+  border-top: 1px solid #4b5563;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  text-align: center;
+}
+
+/* Ajustar tamaños de texto para títulos */
+.footer h3 {
+  font-size: 1.25rem; /* Título principal "ELECTROYANG E.I.R.L." */
+  font-weight: bold;
+}
+
+.footer h4 {
+  font-size: 1.125rem; /* Títulos como "Servicios", "Contacto" */
+  font-weight: 600; /* Semi-bold */
+}
+
+.footer p {
+  font-size: 0.875rem; /* Texto de los párrafos, más pequeño */
+}
+
+.footer ul li {
+  font-size: 0.875rem; /* Lista de elementos en las columnas */
+}
+
+.footer .flex {
+  display: flex;
+  gap: 0.5rem; /* Espacio entre cada elemento */
+}
+
+/* Clase para aumentar la separación entre los elementos de tipo span */
+.spaced-span {
+  margin-right: 2rem; /* Aumenta la separación entre los elementos */
+  padding: 0.5rem 1.5rem;/* Bordes redondeados */ /* Se puede ajustar este valor para aumentar o reducir la separación */
+}
