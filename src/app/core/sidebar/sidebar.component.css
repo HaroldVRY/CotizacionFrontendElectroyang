@@ -44,7 +44,22 @@
   margin: 0;
 }
 
-/* Estilos personalizados para PrimeNG PanelMenu */
+/* Estilos para la nueva estructura de menú personalizada */
+.sidebar-menu {
+  padding: 16px;
+}
+
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-item {
+  margin: 8px 0;
+}
+
+/* Estilos personalizados para PrimeNG PanelMenu (backup) */
 :host ::ng-deep .sidebar-menu {
   border: none;
   background: transparent;

@@ -1,0 +1,542 @@
+<!-- Toast para mensajes -->
+<p-toast></p-toast>
+
+<!-- Dialog de confirmación -->
+<p-confirmDialog></p-confirmDialog>
+
+<p-toolbar styleClass="custom-toolbar">
+  <ng-template #start></ng-template>
+  <ng-template #center>
+    <h4>{{ pageTitle }} {{ cotizacion?.numero }}</h4>
+  </ng-template>
+  <ng-template #end>
+    <div class="d-flex gap-2">
+      <p-button *ngIf="!isReadOnly" label="Guardar" icon="pi pi-save" severity="success" [loading]="saving"
+        (onClick)="guardarCotizacion()">
+      </p-button>
+      <p-button *ngIf="cotizacionId && !isReadOnly" label="Generar PDF" icon="pi pi-eye" severity="danger"
+        (onClick)="vistaPrevia()">
+      </p-button>
+      <p-button label="Cancelar" icon="pi pi-times" severity="secondary" (onClick)="cancelar()">
+      </p-button>
+    </div>
+  </ng-template>
+</p-toolbar>
+
+<!-- Detalle de Cotización -->
+<div class="detail-card">
+  <p-card class="info-fields-card" [style]="{ overflow: 'hidden' }">
+    <!-- Encabezado del card -->
+    <ng-template pTemplate="header">
+      <div class="cotizacion-header">
+        <div class="header-left">
+          <h3 class="detail-title">Detalle de Cotización</h3>
+        </div>
+        <div class="header-center">
+          <p-tag styleClass="tag-primary-light tag-md">
+            <i class="pi pi-building info-icon"></i>
+            Cliente:
+            {{cotizacion?.cliente || '-'}}
+          </p-tag>
+          <p-tag styleClass="tag-secondary tag-md" [value]="cotizacion?.estado || 'Borrador'"></p-tag>
+        </div>
+        <div class="header-right">
+          <p-button label="Acciones" severity="secondary" size="small" styleClass="p-button-sm"
+            [disabled]="isReadOnly"></p-button>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="content">
+      <!-- Layout de 2 columnas -->
+      <div class="two-column-layout">
+        <!-- COLUMNA 1: Datos Generales -->
+        <div class="column-1">
+          <!-- Sección: Datos Generales -->
+          <div class="info-section">
+            <p-card class="info-fields-card" [style]="{ overflow: 'hidden' }">
+              <ng-template pTemplate="header">
+                <div class="section-title-header">
+                  <h4><strong>Información General</strong></h4>
+                </div>
+              </ng-template>
+              <ng-template pTemplate="content">
+                <div class="info-fields-section-three-columns">
+                  <!-- COLUMNA 1: Información Básica -->
+                  <div class="info-fields-section-colum">
+                    <p-inputgroup class="md:!w-80">
+                      <p-inputgroup-addon>
+                        <i class="pi pi-tag icon-primary icon-clickable icon-lg"></i>
+                      </p-inputgroup-addon>
+                      <p-iftalabel>
+                        <input type="text" pInputText [value]="cotizacion?.numero || '-'"
+                          readonly pTooltip="{{cotizacion?.numero || '-'}}"
+                          tooltipPosition="top" [showDelay]="300" id="numeroCotizacion" />
+                        <label for="numeroCotizacion">Número de Cotización</label>
+                      </p-iftalabel>
+                    </p-inputgroup>
+                    <p-inputgroup class="md:!w-80">
+                      <p-inputgroup-addon>
+                        <i class="pi pi-users icon-primary icon-clickable icon-lg"></i>
+                      </p-inputgroup-addon>
+                      <p-iftalabel>
+                        <input type="text" pInputText [value]="cotizacion?.cliente || '-'"
+                          readonly pTooltip="{{cotizacion?.cliente || '-'}}" tooltipPosition="top"
+                          [showDelay]="300" id="clienteCotizacion" />
+                        <label for="clienteCotizacion">Cliente</label>
+                      </p-iftalabel>
+                    </p-inputgroup>
+                    <p-inputgroup class="md:!w-80">
+                      <p-inputgroup-addon>
+                        <i class="pi pi-user icon-primary icon-clickable icon-lg"></i>
+                      </p-inputgroup-addon>
+                      <p-iftalabel>
+                        <input type="text" pInputText [value]="cotizacion?.receptor || '-'"
+                          readonly pTooltip="{{cotizacion?.receptor || '-'}}" tooltipPosition="top"
+                          [showDelay]="300" id="receptorCotizacion" />
+                        <label for="receptorCotizacion">Receptor</label>
+                      </p-iftalabel>
+                    </p-inputgroup>
+                  </div>
+                  <!-- COLUMNA 2: Información de Pago y Fechas -->
+                  <div class="info-fields-section-colum">
+                    <p-inputgroup class="md:!w-80">
+                      <p-inputgroup-addon>
+                        <i class="pi pi-calendar-plus icon-primary icon-clickable icon-lg"></i>
+                      </p-inputgroup-addon>
+                      <p-iftalabel>
+                        <input type="text" pInputText
+                          [value]="(cotizacion?.fecha | date:'dd/MM/yyyy') || '-'" readonly
+                          pTooltip="{{(cotizacion?.fecha | date:'dd/MM/yyyy') || '-'}}" tooltipPosition="top"
+                          [showDelay]="300" id="fechaCotizacion" />
+                        <label for="fechaCotizacion">Fecha de Cotización</label>
+                      </p-iftalabel>
+                    </p-inputgroup>
+                    <p-inputgroup class="md:!w-80">
+                      <p-inputgroup-addon>
+                        <i class="pi pi-credit-card icon-primary icon-clickable icon-lg"></i>
+                      </p-inputgroup-addon>
+                      <p-iftalabel>
+                        <input type="text" pInputText [value]="cotizacion?.formaPago || '-'" readonly
+                          pTooltip="{{cotizacion?.formaPago || '-'}}" tooltipPosition="top"
+                          [showDelay]="300" id="formaPagoCotizacion" />
+                        <label for="formaPagoCotizacion">Forma de Pago</label>
+                      </p-iftalabel>
+                    </p-inputgroup>
+                    <p-inputgroup class="md:!w-80">
+                      <p-inputgroup-addon>
+                        <i class="pi pi-clock icon-primary icon-clickable icon-lg"></i>
+                      </p-inputgroup-addon>
+                      <p-iftalabel>
+                        <input type="text" pInputText [value]="cotizacion?.tiempoEntrega || '-'" readonly
+                          pTooltip="{{cotizacion?.tiempoEntrega || '-'}}" tooltipPosition="top"
+                          [showDelay]="300" id="tiempoEntregaCotizacion" />
+                        <label for="tiempoEntregaCotizacion">Tiempo de Entrega</label>
+                      </p-iftalabel>
+                    </p-inputgroup>
+                  </div>
+                  <!-- COLUMNA 3: Estado y Montos -->
+                  <div class="info-fields-section-colum">
+                    <p-inputgroup class="md:!w-80">
+                      <p-inputgroup-addon>
+                        <i class="pi pi-bookmark icon-primary icon-clickable icon-lg"></i>
+                      </p-inputgroup-addon>
+                      <p-iftalabel>
+                        <input type="text" pInputText [value]="cotizacion?.estado || '-'"
+                          readonly pTooltip="{{cotizacion?.estado || 'Borrador'}}" tooltipPosition="top"
+                          [showDelay]="300" id="estadoCotizacion" />
+                        <label for="estadoCotizacion">Estado</label>
+                      </p-iftalabel>
+                    </p-inputgroup>
+                    <p-inputgroup class="md:!w-80">
+                      <p-inputgroup-addon>
+                        <i class="pi pi-percentage icon-primary icon-clickable icon-lg"></i>
+                      </p-inputgroup-addon>
+                      <p-iftalabel>
+                        <input type="text" pInputText [value]="(cotizacion?.subtotal | currency:'PEN':'symbol':'1.2-2') || 'S/ 0.00'" readonly
+                          pTooltip="{{(cotizacion?.subtotal | currency:'PEN':'symbol':'1.2-2') || 'S/ 0.00'}}" tooltipPosition="top"
+                          [showDelay]="300" id="subtotalCotizacion" />
+                        <label for="subtotalCotizacion">Subtotal</label>
+                      </p-iftalabel>
+                    </p-inputgroup>
+                    <p-inputgroup class="md:!w-80">
+                      <p-inputgroup-addon>
+                        <i class="pi pi-dollar icon-primary icon-clickable icon-lg"></i>
+                      </p-inputgroup-addon>
+                      <p-iftalabel>
+                        <input type="text" pInputText [value]="cotizacion?.precioTotalFormatted || 'S/ 0.00'" readonly
+                          pTooltip="{{cotizacion?.precioTotalFormatted || 'S/ 0.00'}}" tooltipPosition="top"
+                          [showDelay]="300" id="totalCotizacion" />
+                        <label for="totalCotizacion">Total</label>
+                      </p-iftalabel>
+                    </p-inputgroup>
+                  </div>
+                </div>
+              </ng-template>
+            </p-card>
+          </div>
+        </div>
+
+        <!-- COLUMNA 2: Observaciones -->
+        <div class="column-2">
+          <div class="info-section">
+            <p-card class="info-fields-card" [style]="{ overflow: 'hidden' }">
+              <ng-template pTemplate="header">
+                <div class="section-title-header">
+                  <h4><strong>Observaciones</strong></h4>
+                </div>
+              </ng-template>
+              <ng-template pTemplate="content">
+                <div class="observaciones-container">
+                  <div *ngIf="cotizacion?.observaciones && cotizacion?.observaciones?.trim() !== ''; else noObservationsTemplate"
+                    class="observaciones-content">
+                    <p-inputgroup class="w-full">
+                      <p-inputgroup-addon>
+                        <i class="pi pi-comment icon-primary icon-clickable icon-lg"></i>
+                      </p-inputgroup-addon>
+                      <textarea pInputTextarea [value]="cotizacion?.observaciones"
+                        readonly rows="8" class="w-full observaciones-textarea"
+                        placeholder="Observaciones de la cotización"
+                        title="Observaciones"
+                        pTooltip="{{cotizacion?.observaciones}}" tooltipPosition="top" [showDelay]="300">
+                      </textarea>
+                    </p-inputgroup>
+                  </div>
+                  <ng-template #noObservationsTemplate>
+                    <div class="no-observations-placeholder">
+                      <i class="pi pi-comment placeholder-icon icon-primary icon-clickable icon-lg"></i>
+                      <p class="placeholder-text">
+                        No hay observaciones para esta cotización
+                      </p>
+                      <small class="placeholder-hint">Las observaciones aparecerán aquí cuando sean agregadas</small>
+                    </div>
+                  </ng-template>
+                </div>
+              </ng-template>
+            </p-card>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </p-card>
+</div>
+
+  <!-- Datos Bancarios (si se muestran) -->
+  <div *ngIf="cotizacion?.banco" class="detail-card">
+    <p-card class="info-fields-card" [style]="{ overflow: 'hidden' }">
+      <ng-template pTemplate="header">
+        <div class="section-title-header">
+          <h4><strong>Datos Bancarios</strong></h4>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="content">
+        <div class="info-fields-section-three-columns">
+          <div class="info-fields-section-colum">
+            <p-inputgroup class="md:!w-80">
+              <p-inputgroup-addon>
+                <i class="pi pi-building icon-primary icon-clickable icon-lg"></i>
+              </p-inputgroup-addon>
+              <p-iftalabel>
+                <input type="text" pInputText [value]="cotizacion?.banco?.nombre || '-'" readonly
+                  pTooltip="{{cotizacion?.banco?.nombre || '-'}}" tooltipPosition="top"
+                  [showDelay]="300" id="nombreBanco" />
+                <label for="nombreBanco">Nombre del Banco</label>
+              </p-iftalabel>
+            </p-inputgroup>
+          </div>
+          <div class="info-fields-section-colum">
+            <p-inputgroup class="md:!w-80">
+              <p-inputgroup-addon>
+                <i class="pi pi-credit-card icon-primary icon-clickable icon-lg"></i>
+              </p-inputgroup-addon>
+              <p-iftalabel>
+                <input type="text" pInputText [value]="cotizacion?.banco?.cuentaCorriente || '-'" readonly
+                  pTooltip="{{cotizacion?.banco?.cuentaCorriente || '-'}}" tooltipPosition="top"
+                  [showDelay]="300" id="cuentaCorriente" />
+                <label for="cuentaCorriente">Cuenta Corriente</label>
+              </p-iftalabel>
+            </p-inputgroup>
+          </div>
+          <div class="info-fields-section-colum">
+            <p-inputgroup class="md:!w-80">
+              <p-inputgroup-addon>
+                <i class="pi pi-link icon-primary icon-clickable icon-lg"></i>
+              </p-inputgroup-addon>
+              <p-iftalabel>
+                <input type="text" pInputText [value]="cotizacion?.banco?.cuentaInterbancaria || '-'" readonly
+                  pTooltip="{{cotizacion?.banco?.cuentaInterbancaria || '-'}}" tooltipPosition="top"
+                  [showDelay]="300" id="cuentaInterbancaria" />
+                <label for="cuentaInterbancaria">Cuenta Interbancaria</label>
+              </p-iftalabel>
+            </p-inputgroup>
+          </div>
+        </div>
+      </ng-template>
+    </p-card>
+  </div>
+
+  <!-- Items de la Cotización -->
+  <div class="detail-card">
+    <p-card class="info-fields-card" [style]="{ overflow: 'hidden' }">
+      <ng-template pTemplate="header">
+        <div class="section-title-header">
+          <div class="header-left-items">
+            <h4><strong>Items de la Cotización</strong></h4>
+          </div>
+          <div class="header-right-items" *ngIf="!isReadOnly">
+            <p-button 
+              label="Añadir Item" 
+              icon="pi pi-plus" 
+              severity="success" 
+              size="small" 
+              (onClick)="abrirDialogoAgregarItem()"
+              styleClass="p-button-sm">
+            </p-button>
+          </div>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="content">
+        <div class="items-table-container">
+          <p-table [value]="cotizacion?.items || cotizacion?.detalles || []"
+                   styleClass="p-datatable-sm"
+                   [tableStyle]="{'min-width': '50rem'}"
+                   [paginator]="false"
+                   [responsive]="true">
+            <ng-template pTemplate="header">
+              <tr>
+                <th style="width: 8%">#</th>
+                <th style="width: 12%">Cantidad</th>
+                <th style="width: 40%">Descripción</th>
+                <th style="width: 15%">Precio Unit.</th>
+                <th style="width: 15%" class="text-right">Total</th>
+                <th *ngIf="!isReadOnly" style="width: 10%" class="text-center">Acciones</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+              <tr>
+                <td class="text-center">
+                  <p-tag [value]="rowIndex + 1" severity="secondary" styleClass="tag-sm"></p-tag>
+                </td>
+                <td class="text-center">
+                  <span class="font-semibold">{{ item.cantidad || 0 }}</span>
+                </td>
+                <td>
+                  <div class="item-description-cell">
+                    <span class="item-description-text" [pTooltip]="item.descripcion" tooltipPosition="top">
+                      {{ item.descripcion || '-' }}
+                    </span>
+                  </div>
+                </td>
+                <td class="text-right">
+                  <span class="price-value">{{ (item.precioUnitario | currency:'PEN':'symbol':'1.2-2') || 'S/ 0.00' }}</span>
+                </td>
+                <td class="text-right">
+                  <span class="total-value font-semibold">{{ ((item.cantidad || 0) * (item.precioUnitario || 0) | currency:'PEN':'symbol':'1.2-2') || 'S/ 0.00' }}</span>
+                </td>
+                <td *ngIf="!isReadOnly" class="text-center">
+                  <div class="flex gap-1 justify-content-center">
+                    <p-button 
+                      icon="pi pi-pencil" 
+                      severity="info" 
+                      size="small" 
+                      [text]="true"
+                      pTooltip="Editar item"
+                      tooltipPosition="top"
+                      (onClick)="editarItem(rowIndex)"
+                      styleClass="p-button-rounded p-button-text">
+                    </p-button>
+                    <p-button 
+                      icon="pi pi-trash" 
+                      severity="danger" 
+                      size="small" 
+                      [text]="true"
+                      pTooltip="Eliminar item"
+                      tooltipPosition="top"
+                      (onClick)="eliminarItem(rowIndex)"
+                      styleClass="p-button-rounded p-button-text">
+                    </p-button>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td [attr.colspan]="isReadOnly ? 5 : 6" class="text-center p-4">
+                  <div class="no-items-table-message">
+                    <i class="pi pi-shopping-cart text-4xl text-gray-400 mb-2"></i>
+                    <p class="text-lg text-gray-600 mb-1">No hay items en esta cotización</p>
+                    <small class="text-gray-500">Los items aparecerán aquí cuando sean agregados</small>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+
+        <!-- Resumen Financiero -->
+        <p-divider></p-divider>
+        <div class="total-section-display">
+          <div class="totals-grid-display">
+            <div class="total-row-display">
+              <span class="total-label-display">Subtotal:</span>
+              <span class="total-value-display">{{ (cotizacion?.subtotal | currency:'PEN':'symbol':'1.2-2') || 'S/ 0.00' }}</span>
+            </div>
+            <div class="total-row-display">
+              <span class="total-label-display">IGV (18%):</span>
+              <span class="total-value-display">{{ (cotizacion?.igv | currency:'PEN':'symbol':'1.2-2') || 'S/ 0.00' }}</span>
+            </div>
+            <div class="total-row-display total-final-display">
+              <span class="total-label-display">Total General:</span>
+              <span class="total-value-display">{{ cotizacion?.precioTotalFormatted || 'S/ 0.00' }}</span>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </p-card>
+  </div>
+
+<!-- Modal para agregar/editar item -->
+<p-dialog 
+  [header]="modoEdicion ? 'Editar Item de la Cotización' : 'Agregar Item a la Cotización'" 
+  [(visible)]="mostrarDialogoAgregarItem" 
+  [modal]="true" 
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+  [style]="{ width: '600px', maxWidth: '90vw' }">
+  
+  <form [formGroup]="agregarItemForm" (ngSubmit)="agregarItem()">
+    <div class="formgrid grid">
+      <!-- Cantidad -->
+      <div class="field col-12 md:col-6">
+        <label for="cantidad" class="field-label required">Cantidad:</label>
+        <p-inputNumber 
+          id="cantidad"
+          formControlName="cantidad" 
+          [min]="1" 
+          [max]="999999"
+          placeholder="Ingrese la cantidad"
+          [class.p-invalid]="agregarItemForm.get('cantidad')?.invalid && agregarItemForm.get('cantidad')?.touched"
+          styleClass="w-full">
+        </p-inputNumber>
+        <small *ngIf="agregarItemForm.get('cantidad')?.invalid && agregarItemForm.get('cantidad')?.touched" class="p-error">
+          La cantidad es requerida y debe ser mayor a 0
+        </small>
+      </div>
+
+      <!-- Precio Unitario -->
+      <div class="field col-12 md:col-6">
+        <label for="precioUnitario" class="field-label required">Precio Unitario:</label>
+        <p-inputNumber 
+          id="precioUnitario"
+          formControlName="precioUnitario"
+          mode="currency" 
+          currency="PEN" 
+          locale="es-PE"
+          [min]="0"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="2"
+          placeholder="0.00"
+          [class.p-invalid]="agregarItemForm.get('precioUnitario')?.invalid && agregarItemForm.get('precioUnitario')?.touched"
+          styleClass="w-full">
+        </p-inputNumber>
+        <small *ngIf="agregarItemForm.get('precioUnitario')?.invalid && agregarItemForm.get('precioUnitario')?.touched" class="p-error">
+          El precio unitario es requerido
+        </small>
+      </div>
+
+      <!-- Descripción con AutoComplete -->
+      <div class="field col-12">
+        <label for="descripcion" class="field-label required">Descripción:</label>
+        <p-autoComplete 
+          id="descripcion"
+          formControlName="descripcion"
+          [suggestions]="serviciosSugeridos"
+          (completeMethod)="buscarServicios($event)"
+          field="descripcion"
+          placeholder="Busque un servicio o escriba una descripción personalizada"
+          [minLength]="1"
+          [delay]="300"
+          [showEmptyMessage]="true"
+          emptyMessage="No se encontraron servicios"
+          [class.p-invalid]="agregarItemForm.get('descripcion')?.invalid && agregarItemForm.get('descripcion')?.touched"
+          styleClass="w-full"
+          (onSelect)="onServicioSeleccionado($event)"
+          [dropdown]="true">
+          
+          <ng-template let-servicio pTemplate="item">
+            <div class="servicio-suggestion-item">
+              <div class="servicio-nombre">{{ servicio.nombre }}</div>
+              <div class="servicio-descripcion">{{ servicio.descripcion }}</div>
+              <div class="servicio-precio">{{ servicio.precio | currency:'PEN':'symbol':'1.2-2' }}</div>
+            </div>
+          </ng-template>
+        </p-autoComplete>
+        <small *ngIf="agregarItemForm.get('descripcion')?.invalid && agregarItemForm.get('descripcion')?.touched" class="p-error">
+          La descripción es requerida
+        </small>
+      </div>
+
+      <!-- Información del servicio seleccionado -->
+      <div *ngIf="servicioSeleccionado" class="field col-12">
+        <p-card styleClass="servicio-selected-card">
+          <ng-template pTemplate="header">
+            <div class="servicio-header">
+              <i class="pi pi-check-circle text-green-600 mr-2"></i>
+              <span class="font-semibold">Servicio Seleccionado</span>
+            </div>
+          </ng-template>
+          <div class="servicio-info">
+            <p><strong>Nombre:</strong> {{ servicioSeleccionado.nombre }}</p>
+            <p><strong>Precio sugerido:</strong> {{ servicioSeleccionado.precio | currency:'PEN':'symbol':'1.2-2' }}</p>
+            <p><strong>Unidad:</strong> {{ servicioSeleccionado.unidad }}</p>
+          </div>
+        </p-card>
+      </div>
+
+      <!-- Total calculado -->
+      <div class="field col-12">
+        <p-divider></p-divider>
+        <div class="total-preview">
+          <div class="flex justify-content-between align-items-center">
+            <span class="text-lg font-semibold">Total del Item:</span>
+            <span class="text-xl font-bold text-primary">
+              {{ calcularTotalItem() | currency:'PEN':'symbol':'1.2-2' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-content-end gap-2">
+      <p-button 
+        label="Cancelar" 
+        icon="pi pi-times" 
+        severity="secondary"
+        [text]="true"
+        (onClick)="cerrarDialogoAgregarItem()">
+      </p-button>
+      <p-button 
+        [label]="modoEdicion ? 'Actualizar Item' : 'Agregar Item'" 
+        [icon]="modoEdicion ? 'pi pi-check' : 'pi pi-plus'" 
+        severity="success"
+        [loading]="guardandoItem"
+        [disabled]="agregarItemForm.invalid || guardandoItem"
+        (onClick)="modoEdicion ? confirmarEditarItem() : confirmarAgregarItem()">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Loading overlay -->
+<div *ngIf="loading" class="loading-overlay">
+  <div class="loading-content">
+    <i class="pi pi-spin pi-spinner text-4xl mb-3"></i>
+    <p>Cargando cotización...</p>
+  </div>
+</div>
+
+

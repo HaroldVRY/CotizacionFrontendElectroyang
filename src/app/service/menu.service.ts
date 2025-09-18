@@ -9,20 +9,20 @@ export class MenuService {
   items: MenuItem[] = [
     {
       label: 'Cotizaciones',
-      routerLink: '/mantenimiento-consulta/lista-inicio',
-      icon: 'pi pi-home',
+      routerLink: '/cotizar/mantenimiento-consulta',
+      icon: 'pi pi-list',
       iconRef: 'iconInicio'
     },
     {
       label: 'Clientes',
-      routerLink: '/clientes/lista-clientes',
-      icon: 'pi pi-home',
+      routerLink: '/cotizar/clientes',
+      icon: 'pi pi-users',
       iconRef: 'iconInicio'
     },
     {
       label: 'Servicios',
-      routerLink: '/servicios/lista-servicios',
-      icon: 'pi pi-home',
+      routerLink: '/cotizar/servicios',
+      icon: 'pi pi-cog',
       iconRef: 'iconInicio'
     },
     // {

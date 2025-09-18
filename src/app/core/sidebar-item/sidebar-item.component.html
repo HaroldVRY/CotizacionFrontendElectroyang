@@ -8,13 +8,13 @@
   <ng-container *ngIf="item.items && item.items.length > 0">
     <i
       class="pi pi-chevron-down expand-icon"
-      [ngClass]="{ 'expanded': item.expanded }"
+      [ngClass]="{ 'expanded': isExpanded }"
     ></i>
   </ng-container>
 </a>
 
 <!-- Submenu with smooth animation -->
-<ul class="submenu" [ngClass]="{ 'expanded': item.expanded }" *ngIf="item.items && item.items.length > 0">
+<ul class="submenu" [ngClass]="{ 'expanded': isExpanded }" *ngIf="item.items && item.items.length > 0">
   <li *ngFor="let subItem of item.items" class="submenu-item">
     <!-- Llamada recursiva para submenús -->
     <app-sidebar-item [item]="subItem" [depth]="depth + 1"></app-sidebar-item>

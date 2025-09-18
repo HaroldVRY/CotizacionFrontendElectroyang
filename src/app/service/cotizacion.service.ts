@@ -11,7 +11,7 @@ import {
   PaginatedResponse,
   Cliente,
   Servicio
-} from '../interface/cotizacion.interface';@Injectable({
+} from '../modules/cotizar/interface/cotizacion.interface';@Injectable({
   providedIn: 'root'
 })
 export class CotizacionService {
@@ -195,6 +195,40 @@ export class CotizacionService {
       );
   }
 
+  /**
+   * Buscar servicios por término
+   */
+  buscarServicios(termino: string): Observable<ApiResponse<Servicio[]>> {
+    return this.http.get<ApiResponse<Servicio[]>>(`${this.API_URL}/servicios/search?term=${termino}`)
+      .pipe(
+        catchError(error => {
+          this.setError('Error al buscar servicios');
+          throw error;
+        })
+      );
+  }
+
+  /**
+   * Actualizar cotización (método adicional para items)
+   */
+  actualizarCotizacion(id: string | number, datos: any): Observable<ApiResponse<Cotizacion>> {
+    this.setLoading(true);
+
+    return this.http.put<ApiResponse<Cotizacion>>(`${this.API_URL}/cotizaciones/${id}`, datos)
+      .pipe(
+        map(response => {
+          this.setLoading(false);
+          this.clearError();
+          return response;
+        }),
+        catchError(error => {
+          this.setLoading(false);
+          this.setError('Error al actualizar la cotización');
+          throw error;
+        })
+      );
+  }
+
   // ===== REPORTES =====
 
   /**
@@ -203,7 +237,10 @@ export class CotizacionService {
   generarReporte(id: string | number): Observable<Blob> {
     this.setLoading(true);
 
-    return this.http.get(`${this.API_URL}/generar-reporte/${id}`, { responseType: 'blob' })
+    // Usar el endpoint correcto para la generación de reportes
+    const REPORTS_URL = environment.reportsUrl;
+
+    return this.http.get(`${REPORTS_URL}/generate-pdf/${id}`, { responseType: 'blob' })
       .pipe(
         map(response => {
           this.setLoading(false);

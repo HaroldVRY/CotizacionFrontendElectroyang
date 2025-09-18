@@ -3,9 +3,12 @@
     <h3 class="titulo">{{ titulo }}</h3>
   </div>
 
-  <p-panelMenu
-    [model]="menuItems"
-    [styleClass]="'sidebar-menu'"
-    [multiple]="false">
-  </p-panelMenu>
+  <!-- Usar componentes personalizados como en toolbar -->
+  <div class="sidebar-menu">
+    <ul class="menu-list">
+      <li *ngFor="let item of menuItems" class="menu-item">
+        <app-sidebar-item [item]="item"></app-sidebar-item>
+      </li>
+    </ul>
+  </div>
 </div>

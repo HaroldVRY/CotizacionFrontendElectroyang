@@ -49,7 +49,13 @@ export class ToolbarItemComponent implements OnInit, OnDestroy {
 
   // Alterna la expansión del menú
   toggleExpansion() {
-    console.log('toggleExpansion called for item:', this.item.label);
+    console.log('=== TOOLBAR CLICK DEBUG ===');
+    console.log('Item:', this.item.label);
+    console.log('routerLink:', this.item.routerLink);
+    console.log('items:', this.item.items);
+    console.log('expanded:', this.item.expanded);
+    console.log('isExpanded:', this.isExpanded);
+    console.log('===========================');
 
     if (this.item.items && this.item.items.length > 0) {
       const itemId = this.getItemId();

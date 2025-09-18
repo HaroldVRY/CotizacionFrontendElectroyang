@@ -1,0 +1,173 @@
+<!-- Toast para mensajes -->
+<p-toast></p-toast>
+
+<!-- Dialog de confirmación -->
+<p-confirmDialog></p-confirmDialog>
+
+<p-toolbar styleClass="custom-toolbar">
+  <ng-template #start>
+    <div class="d-flex gap-2">
+      <p-iconfield iconPosition="left">
+        <p-inputicon>
+          <i class="pi pi-search"></i>
+        </p-inputicon>
+        <input #searchInput pInputText type="text"
+          (input)="dt1.filterGlobal(searchInput.value, 'contains'); onTableFilter()"
+          placeholder="Buscar cotización..." />
+      </p-iconfield>
+      <p-button styleClass="btn-info  btn-md" severity="info"
+        [icon]="filtrosVisibles ? 'pi pi-filter-slash' : 'pi pi-filter'" (click)="toggleFiltros()" label="Filtros" />
+      <p-button styleClass="btn-danger  btn-md" severity="danger" label="Limpiar Filtros" icon="pi pi-times"
+        (click)="clear(dt1, searchInput)" />
+    </div>
+  </ng-template>
+  <ng-template #center>
+    <h4>Lista de Cotizaciones</h4>
+  </ng-template>
+  <ng-template #end>
+    <p-button label="Nueva Cotización" icon="pi pi-plus" severity="success" (onClick)="nuevaCotizacion()">
+    </p-button>
+  </ng-template>
+</p-toolbar>
+
+<p-divider></p-divider>
+
+<p-table #dt1 [value]="cotizaciones" [loading]="loading" [paginator]="true" [rows]="rows"
+  [rowsPerPageOptions]="[10, 25, 50]" [showCurrentPageReport]="true"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+  [globalFilterFields]="['numero', 'cliente', 'receptor', 'estado']" styleClass="p-datatable-gridlines"
+  responsiveLayout="scroll" showGridlines>
+  <!-- Header -->
+  <ng-template pTemplate="header">
+    <tr class="text-center">
+      <!-- Columnas dinámicas (explícitas) -->
+      <th *ngFor="let col of columnasDinamicas" [pSortableColumn]="col.sortable ? col.field : undefined"
+        [style.width]="col.field === 'acciones' ? '200px' : 'auto'">
+        <div class="d-flex gap-1 align-items-center justify-content-center">
+          {{ col.header }}
+          <p-sortIcon *ngIf="col.sortable" [field]="col.field">
+            <ng-template pTemplate="default" let-sortOrder>
+              <i *ngIf="sortOrder === 1" class="pi pi-sort-up sort-icon"></i>
+              <i *ngIf="sortOrder === -1" class="pi pi-sort-down sort-icon"></i>
+              <i *ngIf="sortOrder === 0 || sortOrder == null" class="pi pi-sort sort-icon"></i>
+            </ng-template>
+          </p-sortIcon>
+        </div>
+      </th>
+    </tr>
+    <!-- Fila de filtros dinámicos -->
+    <tr class="filtro" [ngClass]="{'d-none': !filtrosVisibles}">
+      <th *ngFor="let col of columnasDinamicas">
+        <div class="w-100 p-1" *ngIf="col.filtrable">
+          <input *ngIf="col.field === 'numero'" type="text" pInputText pSize="small" class="w-100 filtro-columna-input"
+            [(ngModel)]="filtroNumero"
+            (input)="dt1.filter($any($event.target).value, 'numero', 'contains'); onTableFilter()"
+            placeholder="Filtrar Número" />
+
+          <!-- Input cliente -->
+          <input *ngIf="col.field === 'cliente'" type="text" pInputText pSize="small" class="w-100 filtro-columna-input"
+            [(ngModel)]="filtroCliente"
+            (input)="dt1.filter($any($event.target).value, 'cliente', 'contains'); onTableFilter()"
+            placeholder="Filtrar Cliente" />
+
+          <!-- Input receptor -->
+          <input *ngIf="col.field === 'receptor'" type="text" pInputText pSize="small"
+            class="w-100 filtro-columna-input" [(ngModel)]="filtroReceptor"
+            (input)="dt1.filter($any($event.target).value, 'receptor', 'contains'); onTableFilter()"
+            placeholder="Filtrar Receptor" />
+
+          <!-- DatePicker fecha -->
+          <p-datepicker *ngIf="col.field === 'fecha'" size="small" class="w-100" [(ngModel)]="filtroFecha"
+            (onSelect)="dt1.filter($event, 'fecha', 'dateIs'); onTableFilter()"
+            (onClear)="filtroFecha = null; dt1.filter(null, 'fecha', 'dateIs'); onTableFilter()" dateFormat="dd/mm/yy"
+            placeholder="Filtrar Fecha" />
+
+          <!-- Dropdown estado -->
+          <p-dropdown *ngIf="col.field === 'estado'" pSize="small" class="w-100" [(ngModel)]="filtroEstado"
+            (onChange)="dt1.filter($event.value, 'estado', 'equals'); onTableFilter()" [options]="estadoOptions"
+            optionLabel="label" optionValue="value" placeholder="Filtrar Estado" />
+        </div>
+      </th>
+    </tr>
+  </ng-template>
+
+  <!-- Cuerpo dinámico -->
+  <ng-template pTemplate="body" let-cotizacion let-rowIndex="rowIndex">
+    <tr>
+      <td *ngFor="let col of columnasDinamicas" class="cell-center">
+        <!-- Columna número -->
+        <span *ngIf="col.field === 'numero'" class="font-medium text-primary">
+          {{ cotizacion.numero }}
+        </span>
+
+        <!-- Columna fecha -->
+        <span *ngIf="col.field === 'fecha'">
+          {{ formatearFecha(cotizacion.fecha) }}
+        </span>
+
+        <!-- Columna cliente -->
+        <span *ngIf="col.field === 'cliente'">
+          {{ cotizacion.cliente }}
+        </span>
+
+        <!-- Columna receptor -->
+        <span *ngIf="col.field === 'receptor'">
+          {{ cotizacion.receptor }}
+        </span>
+
+        <!-- Columna estado -->
+        <p-tag *ngIf="col.field === 'estado'" [value]="getEstadoLabel(cotizacion.estado || 'borrador')"
+          [severity]="getEstadoSeverity(cotizacion.estado || 'borrador')">
+        </p-tag>
+
+        <!-- Columna total -->
+        <span *ngIf="col.field === 'precioTotal'" class="font-medium">
+          {{ cotizacion.precioTotalFormatted || 'S/ 0.00' }}
+        </span>
+
+        <!-- Columna acciones -->
+        <div *ngIf="col.field === 'acciones'" class="action-buttons">
+          <!-- Botón Ver -->
+          <p-button icon="pi pi-eye" severity="info" size="small" [text]="true" pTooltip="Ver detalle"
+            (onClick)="verDetalle(cotizacion)">
+          </p-button>
+
+          <!-- Botón Editar (solo si no está aprobada) -->
+          <p-button *ngIf="cotizacion.estado !== 'aprobada'" icon="pi pi-pencil" severity="secondary" size="small"
+            [text]="true" pTooltip="Editar" (onClick)="editarCotizacion(cotizacion)">
+          </p-button>
+
+          <!-- Botón Duplicar -->
+          <p-button icon="pi pi-copy" severity="secondary" size="small" [text]="true" pTooltip="Duplicar"
+            (onClick)="duplicarCotizacion(cotizacion)">
+          </p-button>
+
+          <!-- Botón PDF -->
+          <p-button icon="pi pi-file-pdf" severity="danger" size="small" [text]="true" pTooltip="Generar PDF"
+            (onClick)="generarReporte(cotizacion)">
+          </p-button>
+
+          <!-- Menú de más acciones -->
+          <p-menu #menuRef [model]="getMenuItems(cotizacion)" [popup]="true"></p-menu>
+
+          <p-button icon="pi pi-ellipsis-v" severity="secondary" size="small" [text]="true" pTooltip="Más acciones"
+            (onClick)="menuRef.toggle($event)">
+          </p-button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td [attr.colspan]="columnasDinamicas.length" class="text-center p-4">
+        <div class="empty-state">
+          <i class="pi pi-inbox text-4xl text-gray-400 mb-3"></i>
+          <p class="text-gray-600">No se encontraron cotizaciones</p>
+          <p-button label="Crear Primera Cotización" icon="pi pi-plus" severity="success" size="small"
+            (onClick)="nuevaCotizacion()">
+          </p-button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
