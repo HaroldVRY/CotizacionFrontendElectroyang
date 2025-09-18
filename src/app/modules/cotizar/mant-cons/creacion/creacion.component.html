@@ -284,11 +284,11 @@
             <h4><strong>Items de la Cotización</strong></h4>
           </div>
           <div class="header-right-items" *ngIf="!isReadOnly">
-            <p-button 
-              label="Añadir Item" 
-              icon="pi pi-plus" 
-              severity="success" 
-              size="small" 
+            <p-button
+              label="Añadir Item"
+              icon="pi pi-plus"
+              severity="success"
+              size="small"
               (onClick)="abrirDialogoAgregarItem()"
               styleClass="p-button-sm">
             </p-button>
@@ -335,20 +335,20 @@
                 </td>
                 <td *ngIf="!isReadOnly" class="text-center">
                   <div class="flex gap-1 justify-content-center">
-                    <p-button 
-                      icon="pi pi-pencil" 
-                      severity="info" 
-                      size="small" 
+                    <p-button
+                      icon="pi pi-pencil"
+                      severity="info"
+                      size="small"
                       [text]="true"
                       pTooltip="Editar item"
                       tooltipPosition="top"
                       (onClick)="editarItem(rowIndex)"
                       styleClass="p-button-rounded p-button-text">
                     </p-button>
-                    <p-button 
-                      icon="pi pi-trash" 
-                      severity="danger" 
-                      size="small" 
+                    <p-button
+                      icon="pi pi-trash"
+                      severity="danger"
+                      size="small"
                       [text]="true"
                       pTooltip="Eliminar item"
                       tooltipPosition="top"
@@ -396,25 +396,25 @@
   </div>
 
 <!-- Modal para agregar/editar item -->
-<p-dialog 
-  [header]="modoEdicion ? 'Editar Item de la Cotización' : 'Agregar Item a la Cotización'" 
-  [(visible)]="mostrarDialogoAgregarItem" 
-  [modal]="true" 
+<p-dialog
+  [header]="modoEdicion ? 'Editar Item de la Cotización' : 'Agregar Item a la Cotización'"
+  [(visible)]="mostrarDialogoAgregarItem"
+  [modal]="true"
   [closable]="true"
   [draggable]="false"
   [resizable]="false"
   styleClass="p-fluid"
   [style]="{ width: '600px', maxWidth: '90vw' }">
-  
+
   <form [formGroup]="agregarItemForm" (ngSubmit)="agregarItem()">
     <div class="formgrid grid">
       <!-- Cantidad -->
       <div class="field col-12 md:col-6">
         <label for="cantidad" class="field-label required">Cantidad:</label>
-        <p-inputNumber 
+        <p-inputNumber
           id="cantidad"
-          formControlName="cantidad" 
-          [min]="1" 
+          formControlName="cantidad"
+          [min]="1"
           [max]="999999"
           placeholder="Ingrese la cantidad"
           [class.p-invalid]="agregarItemForm.get('cantidad')?.invalid && agregarItemForm.get('cantidad')?.touched"
@@ -428,11 +428,11 @@
       <!-- Precio Unitario -->
       <div class="field col-12 md:col-6">
         <label for="precioUnitario" class="field-label required">Precio Unitario:</label>
-        <p-inputNumber 
+        <p-inputNumber
           id="precioUnitario"
           formControlName="precioUnitario"
-          mode="currency" 
-          currency="PEN" 
+          mode="currency"
+          currency="PEN"
           locale="es-PE"
           [min]="0"
           [minFractionDigits]="2"
@@ -449,7 +449,7 @@
       <!-- Descripción con AutoComplete -->
       <div class="field col-12">
         <label for="descripcion" class="field-label required">Descripción:</label>
-        <p-autoComplete 
+        <p-autoComplete
           id="descripcion"
           formControlName="descripcion"
           [suggestions]="serviciosSugeridos"
@@ -464,7 +464,7 @@
           styleClass="w-full"
           (onSelect)="onServicioSeleccionado($event)"
           [dropdown]="true">
-          
+
           <ng-template let-servicio pTemplate="item">
             <div class="servicio-suggestion-item">
               <div class="servicio-nombre">{{ servicio.nombre }}</div>
@@ -512,16 +512,16 @@
 
   <ng-template pTemplate="footer">
     <div class="flex justify-content-end gap-2">
-      <p-button 
-        label="Cancelar" 
-        icon="pi pi-times" 
+      <p-button
+        label="Cancelar"
+        icon="pi pi-times"
         severity="secondary"
         [text]="true"
         (onClick)="cerrarDialogoAgregarItem()">
       </p-button>
-      <p-button 
-        [label]="modoEdicion ? 'Actualizar Item' : 'Agregar Item'" 
-        [icon]="modoEdicion ? 'pi pi-check' : 'pi pi-plus'" 
+      <p-button
+        [label]="modoEdicion ? 'Actualizar Item' : 'Agregar Item'"
+        [icon]="modoEdicion ? 'pi pi-check' : 'pi pi-plus'"
         severity="success"
         [loading]="guardandoItem"
         [disabled]="agregarItemForm.invalid || guardandoItem"

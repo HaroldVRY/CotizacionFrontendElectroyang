@@ -36,7 +36,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
   serviciosSugeridos: Servicio[] = [];
   servicioSeleccionado: Servicio | null = null;
   guardandoItem = false;
-  
+
   // Propiedades para el modo de edición
   modoEdicion = false;
   itemEditandoIndex: number = -1;
@@ -606,7 +606,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
     this.modoEdicion = true;
     this.itemEditandoIndex = index;
     const item = this.cotizacion.detalles[index];
-    
+
     // Precargar el formulario con los datos del item
     this.agregarItemForm.reset({
       cantidad: item.cantidad || 1,
@@ -691,7 +691,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
   confirmarEditarItem(): void {
     if (this.agregarItemForm.valid && this.cotizacion && this.itemEditandoIndex >= 0) {
       this.guardandoItem = true;
-      
+
       const itemActualizado: ItemCotizacion = {
         servicioId: this.servicioSeleccionado?.id || undefined,
         numeroItem: this.itemEditandoIndex + 1, // Mantener el número original
@@ -750,7 +750,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
   confirmarAgregarItem(): void {
     if (this.agregarItemForm.valid && this.cotizacion) {
       this.guardandoItem = true;
-      
+
       const nuevoItem: ItemCotizacion = {
         servicioId: this.servicioSeleccionado?.id || undefined,
         numeroItem: this.getProximoNumeroItem(),
@@ -817,7 +817,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
         if (this.cotizacion && this.cotizacion.detalles) {
           // Crear una copia del array sin el item eliminado
           const detallesActualizados = this.cotizacion.detalles.filter((_, i) => i !== index);
-          
+
           // Recalcular números de item en la copia
           detallesActualizados.forEach((item, i) => {
             item.numeroItem = i + 1;
@@ -883,7 +883,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
       const subtotal = this.cotizacion.detalles.reduce((sum, item) => {
         return sum + (Number(item.cantidad) * Number(item.precioUnitario));
       }, 0);
-      
+
       const igv = subtotal * 0.18;
       const total = subtotal + igv;
 
@@ -907,7 +907,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
           if (response.data) {
             // Actualizar solo los datos, mantener el estado del formulario
             const cotizacionActualizada = response.data;
-            
+
             // Actualizar el objeto cotización con los datos frescos
             this.cotizacion = {
               ...this.cotizacion,
@@ -915,7 +915,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
               detalles: cotizacionActualizada.detalles || cotizacionActualizada.items || [],
               items: cotizacionActualizada.detalles || cotizacionActualizada.items || []
             };
-            
+
             // Forzar la detección de cambios en Angular
             this.recalcularTotalesCotizacion();
             this.cdr.detectChanges();
