@@ -28,8 +28,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.menuItems = this.menuService.getMenuItems();
     this.setupMenuItems();
-    console.log('Menu items initialized for sidebar:', this.menuItems);
-
     // Suscribirse a los cambios de estado del menú
     this.subscription.add(
       this.menuStateService.currentExpandedItem$.subscribe(state => {

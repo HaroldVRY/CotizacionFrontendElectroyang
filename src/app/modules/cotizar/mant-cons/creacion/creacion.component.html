@@ -34,7 +34,7 @@
       <!-- Tab General -->
       <p-tabpanel value="0">
         <div class="tab-panel-content">
-          <form [formGroup]="cotizacionForm" *ngIf="cotizacionForm">
+          <form [formGroup]="cotizacionForm">
           <!-- Detalle de Cotización -->
           <div class="detail-card">
             <p-card class="info-fields-card" [style]="{ overflow: 'hidden' }">
@@ -48,7 +48,7 @@
                       <p-card class="info-fields-card" [style]="{ overflow: 'hidden' }">
                         <ng-template pTemplate="header">
                           <div class="section-title-header">
-                            <h4><strong>Información General</strong></h4>
+                            <h4><strong>Información General</strong> <small>({{clientes.length}} clientes)</small></h4>
                           </div>
                         </ng-template>
                         <ng-template pTemplate="content">
@@ -79,16 +79,29 @@
                                   <label for="clienteCotizacion">Cliente</label>
                                 </p-iftalabel>
                                 <p-iftalabel *ngIf="!isReadOnly">
-                                  <p-dropdown
-                                    [options]="clientes"
-                                    optionLabel="nombre"
-                                    optionValue="id"
-                                    formControlName="clienteId"
-                                    placeholder="Seleccione un cliente"
-                                    [showClear]="true"
-                                    (onChange)="onClienteSeleccionado()"
-                                    id="clienteDropdown" />
-                                  <label for="clienteDropdown">Cliente</label>
+                                  <p-autocomplete
+                                    [suggestions]="clientesSugeridos"
+                                    (completeMethod)="buscarClientes($event)"
+                                    field="nombre"
+                                    [dropdown]="true"
+                                    [forceSelection]="false"
+                                    [minLength]="0"
+                                    [delay]="500"
+                                    placeholder="🔍 Seleccione un cliente"
+                                    formControlName="cliente"
+                                    (onSelect)="onClienteSeleccionado($event)"
+                                    (onClear)="onClienteClear()"
+                                    [showEmptyMessage]="true"
+                                    emptyMessage="No se encontraron clientes"
+                                    pTooltip="Seleccione un cliente de la lista"
+                                    tooltipPosition="top"
+                                    [showDelay]="300"
+                                    styleClass="w-full autocomplete-cliente"
+                                    appendTo="body"
+                                    [autoHighlight]="true"
+                                    scrollHeight="300px"
+                                    id="clienteAutocomplete" />
+                                  <label for="clienteAutocomplete">Cliente</label>
                                 </p-iftalabel>
                               </p-inputgroup>
                               <p-inputgroup class="md:!w-80">
@@ -200,6 +213,95 @@
                                     pTooltip="{{cotizacion?.precioTotalFormatted || 'S/ 0.00'}}" tooltipPosition="top"
                                     [showDelay]="300" id="totalCotizacion" />
                                   <label for="totalCotizacion">Total</label>
+                                </p-iftalabel>
+                              </p-inputgroup>
+                            </div>
+                          </div>
+                        </ng-template>
+                      </p-card>
+                    </div>
+
+                    <!-- Sección: Datos del Cliente -->
+                    <div class="info-section" *ngIf="clienteSeleccionado">
+                      <p-card class="info-fields-card" [style]="{ overflow: 'hidden' }">
+                        <ng-template pTemplate="header">
+                          <div class="section-title-header">
+                            <h4><strong>Datos del Cliente</strong></h4>
+                          </div>
+                        </ng-template>
+                        <ng-template pTemplate="content">
+                          <div class="info-fields-section-three-columns">
+                            <!-- COLUMNA 1: Identificación -->
+                            <div class="info-fields-section-colum">
+                              <p-inputgroup class="md:!w-80">
+                                <p-inputgroup-addon>
+                                  <i class="pi pi-id-card icon-primary icon-clickable icon-lg"></i>
+                                </p-inputgroup-addon>
+                                <p-iftalabel>
+                                  <input type="text" pInputText
+                                    [value]="clienteSeleccionado.ruc || '-'"
+                                    readonly
+                                    pTooltip="{{clienteSeleccionado.ruc || '-'}}" tooltipPosition="top" [showDelay]="300"
+                                    id="rucCliente" />
+                                  <label for="rucCliente">RUC</label>
+                                </p-iftalabel>
+                              </p-inputgroup>
+                              <p-inputgroup class="md:!w-80">
+                                <p-inputgroup-addon>
+                                  <i class="pi pi-map-marker icon-primary icon-clickable icon-lg"></i>
+                                </p-inputgroup-addon>
+                                <p-iftalabel>
+                                  <input type="text" pInputText
+                                    [value]="clienteSeleccionado.direccion || '-'"
+                                    readonly
+                                    pTooltip="{{clienteSeleccionado.direccion || '-'}}" tooltipPosition="top" [showDelay]="300"
+                                    id="direccionCliente" />
+                                  <label for="direccionCliente">Dirección</label>
+                                </p-iftalabel>
+                              </p-inputgroup>
+                            </div>
+                            <!-- COLUMNA 2: Contacto -->
+                            <div class="info-fields-section-colum">
+                              <p-inputgroup class="md:!w-80">
+                                <p-inputgroup-addon>
+                                  <i class="pi pi-phone icon-primary icon-clickable icon-lg"></i>
+                                </p-inputgroup-addon>
+                                <p-iftalabel>
+                                  <input type="text" pInputText
+                                    [value]="clienteSeleccionado.telefono || '-'"
+                                    readonly
+                                    pTooltip="{{clienteSeleccionado.telefono || '-'}}" tooltipPosition="top" [showDelay]="300"
+                                    id="telefonoCliente" />
+                                  <label for="telefonoCliente">Teléfono</label>
+                                </p-iftalabel>
+                              </p-inputgroup>
+                              <p-inputgroup class="md:!w-80">
+                                <p-inputgroup-addon>
+                                  <i class="pi pi-envelope icon-primary icon-clickable icon-lg"></i>
+                                </p-inputgroup-addon>
+                                <p-iftalabel>
+                                  <input type="text" pInputText
+                                    [value]="clienteSeleccionado.email || '-'"
+                                    readonly
+                                    pTooltip="{{clienteSeleccionado.email || '-'}}" tooltipPosition="top" [showDelay]="300"
+                                    id="emailCliente" />
+                                  <label for="emailCliente">Email</label>
+                                </p-iftalabel>
+                              </p-inputgroup>
+                            </div>
+                            <!-- COLUMNA 3: Persona de Contacto -->
+                            <div class="info-fields-section-colum">
+                              <p-inputgroup class="md:!w-80">
+                                <p-inputgroup-addon>
+                                  <i class="pi pi-user icon-primary icon-clickable icon-lg"></i>
+                                </p-inputgroup-addon>
+                                <p-iftalabel>
+                                  <input type="text" pInputText
+                                    [value]="clienteSeleccionado.contacto || '-'"
+                                    readonly
+                                    pTooltip="{{clienteSeleccionado.contacto || '-'}}" tooltipPosition="top" [showDelay]="300"
+                                    id="contactoCliente" />
+                                  <label for="contactoCliente">Persona de Contacto</label>
                                 </p-iftalabel>
                               </p-inputgroup>
                             </div>
@@ -337,7 +439,7 @@
     <ng-template pTemplate="content">
       <div class="items-table-container">
         <p-table [value]="cotizacion?.items || cotizacion?.detalles || []" styleClass="p-datatable-sm"
-          [tableStyle]="{'min-width': '50rem'}" [paginator]="false" [responsive]="true">
+          [tableStyle]="{'min-width': '50rem'}" [paginator]="false" [scrollable]="true">
           <ng-template pTemplate="header">
             <tr>
               <th style="width: 8%">#</th>
@@ -424,6 +526,150 @@
 </div>
 
 
+
+<!-- Dialog para Agregar/Editar Item -->
+<p-dialog
+  [(visible)]="mostrarDialogoAgregarItem"
+  [header]="modoEdicion ? 'Editar Item' : 'Agregar Nuevo Item'"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="dialog-item"
+  [style]="{width: '90vw', maxWidth: '800px'}">
+
+  <form [formGroup]="agregarItemForm" (ngSubmit)="modoEdicion ? confirmarEditarItem() : confirmarAgregarItem()">
+    <div class="formgrid grid">
+      <!-- Cantidad -->
+      <div class="field col-12 md:col-4">
+        <label for="cantidadModal" class="field-label required">Cantidad:</label>
+        <p-inputNumber
+          id="cantidadModal"
+          formControlName="cantidad"
+          [min]="1"
+          [max]="999999"
+          placeholder="Ingrese la cantidad"
+          [class.p-invalid]="agregarItemForm.get('cantidad')?.invalid && agregarItemForm.get('cantidad')?.touched"
+          styleClass="w-full">
+        </p-inputNumber>
+        <small *ngIf="agregarItemForm.get('cantidad')?.invalid && agregarItemForm.get('cantidad')?.touched" class="p-error">
+          La cantidad es requerida y debe ser mayor a 0
+        </small>
+      </div>
+
+      <!-- Precio Unitario -->
+      <div class="field col-12 md:col-4">
+        <label for="precioUnitarioModal" class="field-label required">Precio Unitario:</label>
+        <p-inputNumber
+          id="precioUnitarioModal"
+          formControlName="precioUnitario"
+          mode="currency"
+          currency="PEN"
+          locale="es-PE"
+          [min]="0"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="2"
+          placeholder="0.00"
+          [class.p-invalid]="agregarItemForm.get('precioUnitario')?.invalid && agregarItemForm.get('precioUnitario')?.touched"
+          styleClass="w-full">
+        </p-inputNumber>
+        <small *ngIf="agregarItemForm.get('precioUnitario')?.invalid && agregarItemForm.get('precioUnitario')?.touched" class="p-error">
+          El precio unitario es requerido
+        </small>
+      </div>
+
+      <!-- Total Calculado -->
+      <div class="field col-12 md:col-4">
+        <label class="field-label">Total:</label>
+        <div class="total-display">
+          <span class="total-amount">{{ calcularTotalItem() | currency:'S/.':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <!-- Descripción con AutoComplete -->
+      <div class="field col-12">
+        <label for="descripcionModal" class="field-label required">Descripción del Servicio:</label>
+        <p-autoComplete
+          id="descripcionModal"
+          formControlName="descripcion"
+          [suggestions]="serviciosSugeridos"
+          (completeMethod)="buscarServicios($event)"
+          field="descripcion"
+          placeholder="Busque un servicio por descripción"
+          [minLength]="1"
+          [delay]="300"
+          [showEmptyMessage]="true"
+          emptyMessage="No se encontraron servicios"
+          [forceSelection]="false"
+          [class.p-invalid]="agregarItemForm.get('descripcion')?.invalid && agregarItemForm.get('descripcion')?.touched"
+          styleClass="w-full"
+          (onSelect)="onServicioSeleccionado($event)"
+          (onClear)="servicioSeleccionado = null"
+          [dropdown]="true"
+          [autoHighlight]="true"
+          scrollHeight="300px"
+          appendTo="body">
+
+          <ng-template let-servicio pTemplate="item">
+            <div class="servicio-suggestion-item">
+              <div class="servicio-header">
+                <span class="servicio-id">ID: {{ servicio.id }}</span>
+                <span class="servicio-precio">{{ servicio.precio | currency:'S/.':'symbol':'1.2-2' }}</span>
+              </div>
+              <div class="servicio-nombre">{{ servicio.nombre }}</div>
+              <div class="servicio-descripcion">{{ servicio.descripcion }}</div>
+            </div>
+          </ng-template>
+        </p-autoComplete>
+
+        <small *ngIf="agregarItemForm.get('descripcion')?.invalid && agregarItemForm.get('descripcion')?.touched" class="p-error">
+          La descripción es requerida
+        </small>
+        <small *ngIf="!agregarItemForm.get('descripcion')?.invalid" class="p-help">
+          Escriba para buscar servicios o haga clic en la flecha para ver opciones
+        </small>
+      </div>
+
+      <!-- Información del servicio seleccionado -->
+      <div *ngIf="servicioSeleccionado" class="field col-12">
+        <p-card styleClass="servicio-selected-card">
+          <ng-template pTemplate="header">
+            <div class="servicio-selected-header">
+              <i class="pi pi-check-circle text-green-600 mr-2"></i>
+              <span class="font-semibold">Servicio Seleccionado</span>
+            </div>
+          </ng-template>
+          <div class="servicio-info">
+            <p><strong>Nombre:</strong> {{ servicioSeleccionado.nombre }}</p>
+            <p><strong>Precio sugerido:</strong> {{ servicioSeleccionado.precio | currency:'S/.':'symbol':'1.2-2' }}</p>
+            <p *ngIf="servicioSeleccionado.unidad"><strong>Unidad:</strong> {{ servicioSeleccionado.unidad }}</p>
+          </div>
+        </p-card>
+      </div>
+    </div>
+  </form>
+
+  <!-- Footer del Dialog -->
+  <ng-template pTemplate="footer">
+    <div class="flex justify-content-end gap-2">
+      <p-button
+        label="Cancelar"
+        icon="pi pi-times"
+        severity="secondary"
+        [text]="true"
+        (onClick)="cerrarDialogoAgregarItem()">
+      </p-button>
+      <p-button
+        [label]="modoEdicion ? 'Actualizar Item' : 'Agregar Item'"
+        [icon]="modoEdicion ? 'pi pi-check' : 'pi pi-plus'"
+        severity="success"
+        [loading]="guardandoItem"
+        [disabled]="agregarItemForm.invalid || guardandoItem"
+        (onClick)="modoEdicion ? confirmarEditarItem() : confirmarAgregarItem()">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>
 
 <!-- Loading overlay -->
 <div *ngIf="loading" class="loading-overlay">

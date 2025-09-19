@@ -715,6 +715,173 @@ input {
   z-index: 99999 !important;
 }
 
+/* ==== ESTILOS ESPECÍFICOS PARA EL AUTOCOMPLETE DE CLIENTES ==== */
+::ng-deep .autocomplete-cliente {
+  width: 100% !important;
+}
+
+::ng-deep .autocomplete-cliente .p-autocomplete-input {
+  width: 100% !important;
+  min-width: 250px !important;
+}
+
+::ng-deep .autocomplete-cliente .p-autocomplete-panel {
+  min-width: 300px !important;
+  max-width: 500px !important;
+  width: auto !important;
+}
+
+::ng-deep .autocomplete-cliente .p-autocomplete-items {
+  max-height: 300px !important;
+  overflow-y: auto !important;
+}
+
+::ng-deep .autocomplete-cliente .p-autocomplete-item {
+  padding: 0.75rem 1rem !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  font-size: 0.9rem !important;
+  color: #374151 !important;
+}
+
+::ng-deep .autocomplete-cliente .p-autocomplete-item:hover {
+  background-color: #f8fafc !important;
+  color: #1f2937 !important;
+}
+
+::ng-deep .autocomplete-cliente .p-autocomplete-item:last-child {
+  border-bottom: none !important;
+}
+
+/* Asegurar que el dropdown del cliente se muestre correctamente */
+::ng-deep .autocomplete-cliente .p-autocomplete-dropdown {
+  border-left: 1px solid #ced4da !important;
+  background: #f8f9fa !important;
+  color: #6c757d !important;
+}
+
+::ng-deep .autocomplete-cliente .p-autocomplete-dropdown:hover {
+  background: #e9ecef !important;
+  color: #495057 !important;
+}
+
+/* ==== ESTILOS PARA EL DIALOG DE ITEMS ==== */
+::ng-deep .dialog-item .p-dialog-content {
+  padding: 1.5rem !important;
+}
+
+::ng-deep .dialog-item .p-dialog-footer {
+  padding: 1rem 1.5rem !important;
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+.field-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.field-label.required::after {
+  content: ' *';
+  color: #dc2626;
+}
+
+.total-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+  border: 2px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-top: 0.25rem;
+  min-height: 48px;
+}
+
+.total-amount {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1c224d;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.servicio-selected-header {
+  display: flex;
+  align-items: center;
+  color: #065f46;
+  font-weight: 600;
+}
+
+::ng-deep .servicio-selected-card {
+  border: 2px solid #10b981 !important;
+  border-radius: 8px !important;
+}
+
+::ng-deep .servicio-selected-card .p-card-header {
+  background: #ecfdf5 !important;
+  border-bottom: 1px solid #a7f3d0 !important;
+  padding: 0.75rem 1rem !important;
+}
+
+::ng-deep .servicio-selected-card .p-card-body {
+  padding: 0.75rem 1rem !important;
+}
+
+/* Responsive para el dialog */
+@media (max-width: 768px) {
+  ::ng-deep .dialog-item {
+    width: 95vw !important;
+    max-width: none !important;
+  }
+
+  ::ng-deep .dialog-item .p-dialog-content {
+    padding: 1rem !important;
+  }
+
+  ::ng-deep .dialog-item .p-dialog-footer {
+    padding: 0.75rem 1rem !important;
+  }
+
+  .total-display {
+    padding: 0.5rem;
+  }
+
+  .total-amount {
+    font-size: 1.1rem;
+  }
+}
+
+/* ==== LOADING OVERLAY ==== */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.loading-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.loading-content p {
+  margin: 0;
+  font-weight: 600;
+  color: #374151;
+}
+
 /* Responsive para el diálogo de servicios */
 @media (max-width: 768px) {
   .servicio-suggestion-item {

@@ -64,7 +64,6 @@ export class DialogoComponent implements OnInit, OnDestroy {
   handleKeyDown = (event: KeyboardEvent): void => {
     if (event.key === 'Enter') {
       this.stopAudio();
-      // console.log('Se presionó Enter mientras el diálogo estaba abierto.');
       this.playAudio()
       event.preventDefault(); // Evitar cualquier acción predeterminada
     }

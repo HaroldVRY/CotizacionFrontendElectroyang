@@ -29,7 +29,6 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.menuItems = this.menuService.getMenuItems();
     this.initializeMenuItems();
-    console.log('Menu items initialized for toolbar:', this.menuItems);
 
     // Suscribirse a los cambios de estado del menú
     this.subscription.add(

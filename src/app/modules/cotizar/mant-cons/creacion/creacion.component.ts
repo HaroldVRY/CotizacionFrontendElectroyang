@@ -22,6 +22,8 @@ export class CreacionComponent implements OnInit, OnDestroy {
   cotizacion: Cotizacion | null = null;
   clientes: Cliente[] = [];
   servicios: Servicio[] = [];
+  clienteSeleccionado: Cliente | null = null;
+  clientesSugeridos: Cliente[] = [];
 
   // Modo de operación
   modo: 'crear' | 'editar' | 'ver' | 'duplicar' = 'crear';
@@ -88,8 +90,14 @@ export class CreacionComponent implements OnInit, OnDestroy {
       this.cotizacionId = params['id'] || null;
       this.modo = params['modo'] || 'crear';
 
+      // Asegurar que activeTab esté inicializado
+      this.activeTab = '0';
+
       if (this.cotizacionId) {
         this.loadCotizacion();
+      } else {
+        // En modo crear, forzar detección de cambios
+        this.cdr.detectChanges();
       }
     });
   }
@@ -111,6 +119,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
       observaciones: [''],
       tiempoEntrega: ['', Validators.required],
       formaPago: ['', Validators.required],
+      estado: ['borrador', Validators.required],
       mostrarDatosBancarios: [false],
       banco: this.fb.group({
         nombre: [''],
@@ -142,6 +151,16 @@ export class CreacionComponent implements OnInit, OnDestroy {
         this.recalcularTotales();
       });
 
+    // Sincronizar selección de cliente cuando cambia el valor
+    this.cotizacionForm.get('cliente')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        // Usar setTimeout para evitar conflictos con la actualización del AutoComplete
+        setTimeout(() => {
+          this.syncClienteSelection();
+        }, 0);
+      });
+
     // Validar datos bancarios cuando se activa la opción
     this.cotizacionForm.get('mostrarDatosBancarios')?.valueChanges
       .pipe(takeUntil(this.destroy$))
@@ -170,6 +189,9 @@ export class CreacionComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.clientes = response.data || [];
+          this.clientesSugeridos = this.clientes; // Inicializar sugerencias
+          console.log('📊 Clientes cargados:', this.clientes.length);
+          console.log('🔍 Primeros clientes:', this.clientes.slice(0, 3).map(c => c.nombre));
         },
         error: (error) => {
           console.error('Error al cargar clientes:', error);
@@ -251,6 +273,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
       observaciones: cotizacion.observaciones || '',
       tiempoEntrega: cotizacion.tiempoEntrega,
       formaPago: cotizacion.formaPago,
+      estado: cotizacion.estado || 'borrador',
       mostrarDatosBancarios: true, // Mostrar datos bancarios por defecto
       banco: cotizacion.banco || {
         nombre: 'Banco de Crédito del Perú',
@@ -258,6 +281,16 @@ export class CreacionComponent implements OnInit, OnDestroy {
         cuentaInterbancaria: '018-000-123456789-01'
       }
     });
+
+    // Buscar y establecer el cliente seleccionado
+    const clienteNombre = cotizacion.cliente || cotizacion.clienteNombre;
+    if (clienteNombre) {
+      // Esperar a que los clientes estén cargados antes de buscar
+      setTimeout(() => {
+        this.clienteSeleccionado = this.findClienteByName(clienteNombre);
+        this.cdr.detectChanges();
+      }, 100);
+    }
 
     // Cargar items (usar detalles si están disponibles, sino items)
     const itemsACargar = cotizacion.items || cotizacion.detalles || [];
@@ -282,6 +315,10 @@ export class CreacionComponent implements OnInit, OnDestroy {
     if (this.modo === 'ver') {
       this.cotizacionForm.disable();
     }
+
+    // Forzar detección de cambios y asegurar que activeTab esté establecido
+    this.activeTab = '0';
+    this.cdr.detectChanges();
   }  // ===== GESTIÓN DE ITEMS =====
 
   get itemsFormArray(): FormArray {
@@ -659,13 +696,16 @@ export class CreacionComponent implements OnInit, OnDestroy {
    * Buscar servicios con autoComplete
    */
   buscarServicios(event: any): void {
-    const query = event.query;
-    if (query && query.length >= 1) {
-      this.cotizacionService.buscarServicios(query).subscribe({
-        next: (response: ApiResponse<Servicio[]>) => {
-          if (response.success) {
-            this.serviciosSugeridos = response.data || [];
-          }
+    const query = event.query || '';
+
+    if (query.length >= 1) {
+      this.cotizacionService.getServicios().subscribe({
+        next: (response) => {
+          const servicios = response.data || [];
+          this.serviciosSugeridos = servicios.filter(servicio =>
+            servicio.descripcion.toLowerCase().includes(query.toLowerCase()) ||
+            servicio.nombre.toLowerCase().includes(query.toLowerCase())
+          );
         },
         error: (error: any) => {
           console.error('Error al buscar servicios:', error);
@@ -673,7 +713,8 @@ export class CreacionComponent implements OnInit, OnDestroy {
         }
       });
     } else {
-      this.serviciosSugeridos = [];
+      // Mostrar todos los servicios cuando no hay query
+      this.serviciosSugeridos = this.servicios.slice(0, 20); // Limitar para mejor rendimiento
     }
   }
 
@@ -955,6 +996,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
    */
   onTabChange(event: any): void {
     this.activeTab = event.value || event;
+    this.cdr.detectChanges();
   }
 
   /**
@@ -962,6 +1004,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
    */
   loadTab(tabValue: string): void {
     this.activeTab = tabValue;
+    this.cdr.detectChanges();
   }
 
   /**
@@ -972,9 +1015,70 @@ export class CreacionComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Manejar selección de cliente (método dummy para compatibilidad con template)
+   * Buscar clientes con autoComplete
    */
-  onClienteSeleccionado(): void {
-    // Método para compatibilidad con el template
+  buscarClientes(event: any): void {
+    const query = event.query || '';
+
+    // Evitar múltiples llamadas con la misma query
+    if (query.length >= 1) {
+      this.clientesSugeridos = this.clientes.filter(cliente =>
+        cliente.nombre.toLowerCase().includes(query.toLowerCase())
+      );
+    } else {
+      // Mostrar todos los clientes cuando no hay query o está vacío
+      this.clientesSugeridos = this.clientes.slice(0, 50); // Limitar a 50 para mejor rendimiento
+    }
+  }
+
+  /**
+   * Cuando se selecciona un cliente del dropdown
+   */
+  onClienteSeleccionado(event: any): void {
+    const cliente: Cliente = event?.value || event;
+    console.log('✅ Cliente seleccionado:', cliente);
+    if (cliente && cliente.nombre) {
+      this.clienteSeleccionado = cliente;
+      console.log('📝 Cliente establecido:', this.clienteSeleccionado.nombre);
+      // No necesitamos hacer patchValue porque el AutoComplete ya actualiza el FormControl
+      // Solo marcamos como tocado para validación
+      this.cotizacionForm.get('cliente')?.markAsTouched();
+      // Forzar detección de cambios para mostrar los datos del cliente
+      this.cdr.detectChanges();
+    }
+  }
+
+  /**
+   * Cuando se limpia la selección del cliente
+   */
+  onClienteClear(): void {
+    this.clienteSeleccionado = null;
+    // El AutoComplete ya limpia el FormControl, solo marcamos como tocado
+    this.cotizacionForm.get('cliente')?.markAsTouched();
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Obtener cliente por nombre (para compatibilidad con carga de datos)
+   */
+  private findClienteByName(nombre: string): Cliente | null {
+    return this.clientes.find(cliente => cliente.nombre === nombre) || null;
+  }
+
+  /**
+   * Sincronizar selección de cliente cuando cambia el valor del formulario
+   */
+  private syncClienteSelection(): void {
+    const clienteNombre = this.cotizacionForm.get('cliente')?.value;
+    if (clienteNombre && typeof clienteNombre === 'string') {
+      const cliente = this.findClienteByName(clienteNombre);
+      if (cliente && cliente !== this.clienteSeleccionado) {
+        this.clienteSeleccionado = cliente;
+        this.cdr.detectChanges();
+      }
+    } else if (!clienteNombre) {
+      this.clienteSeleccionado = null;
+      this.cdr.detectChanges();
+    }
   }
 }
