@@ -209,6 +209,32 @@ export class CotizacionService {
   }
 
   /**
+   * Buscar servicios por descripción (búsqueda avanzada)
+   */
+  buscarServiciosPorDescripcion(descripcion: string): Observable<ApiResponse<Servicio[]>> {
+    return this.http.get<ApiResponse<Servicio[]>>(`${this.API_URL}/servicios/search/advanced?descripcion=${encodeURIComponent(descripcion)}`)
+      .pipe(
+        catchError(error => {
+          this.setError('Error al buscar servicios por descripción');
+          throw error;
+        })
+      );
+  }
+
+  /**
+   * Obtener servicio por ID
+   */
+  getServicioPorId(id: number): Observable<ApiResponse<Servicio>> {
+    return this.http.get<ApiResponse<Servicio>>(`${this.API_URL}/servicios/${id}`)
+      .pipe(
+        catchError(error => {
+          this.setError('Error al obtener el servicio');
+          throw error;
+        })
+      );
+  }
+
+  /**
    * Actualizar cotización (método adicional para items)
    */
   actualizarCotizacion(id: string | number, datos: any): Observable<ApiResponse<Cotizacion>> {

@@ -254,7 +254,7 @@ export class MantConsComponent implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Error al generar reporte:', error);
           let errorMessage = 'Error desconocido al generar el reporte';
-          
+
           if (error.status === 404) {
             errorMessage = 'El servicio de reportes no está disponible. Contacte al administrador.';
           } else if (error.status === 500) {

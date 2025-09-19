@@ -7,6 +7,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { CotizacionService } from '../../../../service/cotizacion.service';
 import {Cotizacion,ItemCotizacion,Cliente,Servicio,CreateCotizacionRequest,ApiResponse} from '../../../../modules/cotizar/interface/cotizacion.interface';
 
+
 @Component({
   selector: 'app-creacion',
   standalone: false,
@@ -41,6 +42,9 @@ export class CreacionComponent implements OnInit, OnDestroy {
   modoEdicion = false;
   itemEditandoIndex: number = -1;
 
+  // Propiedades para las tabs
+  activeTab: string = '0';
+
   // Opciones
   formasPago = [
     { label: 'Contado', value: 'Contado' },
@@ -49,6 +53,16 @@ export class CreacionComponent implements OnInit, OnDestroy {
     { label: 'Efectivo', value: 'Efectivo' },
     { label: 'Crédito 30 días', value: 'Crédito 30 días' }
   ];
+
+  estadosDisponibles = [
+    { label: 'Borrador', value: 'borrador' },
+    { label: 'Enviada', value: 'enviada' },
+    { label: 'Aprobada', value: 'aprobada' },
+    { label: 'Rechazada', value: 'rechazada' },
+    { label: 'Cancelada', value: 'cancelada' }
+  ];
+
+
 
   private destroy$ = new Subject<void>();
 
@@ -772,7 +786,9 @@ export class CreacionComponent implements OnInit, OnDestroy {
         formaPago: this.cotizacion.formaPago,
         estado: this.cotizacion.estado,
         detalles: detallesActualizados
-      };      // Enviar a la API
+      };
+
+      // Enviar a la API
       this.cotizacionService.actualizarCotizacion(this.cotizacionId!, datosActualizados).subscribe({
         next: (response: ApiResponse<Cotizacion>) => {
           if (response.success) {
@@ -930,5 +946,35 @@ export class CreacionComponent implements OnInit, OnDestroy {
           });
         }
       });
+  }
+
+  // ===== MÉTODOS PARA TABS =====
+
+  /**
+   * Cambiar tab activa
+   */
+  onTabChange(event: any): void {
+    this.activeTab = event.value || event;
+  }
+
+  /**
+   * Cargar contenido de tab específica
+   */
+  loadTab(tabValue: string): void {
+    this.activeTab = tabValue;
+  }
+
+  /**
+   * Verificar si hay datos para mostrar
+   */
+  get hasData(): boolean {
+    return this.cotizacion !== null;
+  }
+
+  /**
+   * Manejar selección de cliente (método dummy para compatibilidad con template)
+   */
+  onClienteSeleccionado(): void {
+    // Método para compatibilidad con el template
   }
 }

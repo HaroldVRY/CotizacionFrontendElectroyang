@@ -1,0 +1,177 @@
+/* ==== ESTILOS PARA SERVICIOS ==== */
+.servicio-suggestion-item {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.servicio-suggestion-item:hover {
+  background-color: #f8fafc !important;
+}
+
+.servicio-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.servicio-id {
+  background: #1c224d;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.servicio-nombre {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.servicio-descripcion {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.servicio-precio {
+  color: #059669;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.servicio-selected-card {
+  margin-top: 0.75rem;
+  border: 2px solid #10b981;
+  border-radius: 8px;
+}
+
+::ng-deep .servicio-selected-card .p-card-header {
+  background: #ecfdf5;
+  border-bottom: 1px solid #a7f3d0;
+}
+
+.servicio-info {
+  padding: 0.75rem 0;
+}
+
+.servicio-info p {
+  margin: 0.5rem 0;
+  color: #374151;
+}
+
+.servicio-info strong {
+  color: #1f2937;
+}
+
+.total-preview {
+  background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+  border: 2px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 0.75rem;
+}
+
+/* Mejoras para campos de entrada */
+::ng-deep .p-inputnumber input {
+  text-align: right !important;
+}
+
+::ng-deep .p-autocomplete-input {
+  width: 100% !important;
+}
+
+/* Estilos para validación */
+.p-error {
+  color: #dc2626 !important;
+  font-size: 0.8rem !important;
+  margin-top: 0.25rem !important;
+}
+
+.p-help {
+  color: #6b7280 !important;
+  font-size: 0.75rem !important;
+  margin-top: 0.25rem !important;
+}
+
+.field-label.required::after {
+  content: " *";
+  color: #dc2626;
+}
+
+/* ==== SOLUCION PARA PROBLEMA DEL DROPDOWN AUTOCOMPLETE ==== */
+::ng-deep .p-autocomplete-panel {
+  z-index: 9999 !important;
+  position: fixed !important;
+  pointer-events: auto !important;
+}
+
+::ng-deep .p-autocomplete-items {
+  pointer-events: auto !important;
+  overflow-y: auto !important;
+  max-height: 300px !important;
+}
+
+::ng-deep .p-autocomplete-item {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+::ng-deep .p-autocomplete-dropdown {
+  pointer-events: auto !important;
+  z-index: 1 !important;
+}
+
+::ng-deep .p-autocomplete .p-overlay {
+  pointer-events: auto !important;
+}
+
+::ng-deep .p-autocomplete {
+  position: relative !important;
+}
+
+::ng-deep .p-autocomplete-item:hover {
+  background-color: #f8fafc !important;
+  color: #1f2937 !important;
+}
+
+/* Responsive para el diálogo de servicios */
+@media (max-width: 768px) {
+  .servicio-suggestion-item {
+    padding: 0.5rem;
+  }
+
+  .servicio-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .servicio-id {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .servicio-nombre {
+    font-size: 0.9rem;
+  }
+
+  .servicio-descripcion {
+    font-size: 0.8rem;
+  }
+
+  .servicio-precio {
+    font-size: 0.85rem;
+  }
+
+  ::ng-deep .p-autocomplete-panel {
+    z-index: 999999 !important;
+  }
+}

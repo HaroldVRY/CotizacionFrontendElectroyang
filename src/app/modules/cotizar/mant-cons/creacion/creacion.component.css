@@ -1,0 +1,751 @@
+/* ==== UTILIDADES BÁSICAS ==== */
+.d-flex { display: flex !important; }
+.gap-2 { gap: 0.25rem !important; }
+.p-2 { padding: 0.25rem !important; }
+
+/* ==== COMPONENTES PRINCIPALES ==== */
+.info-section { margin-bottom: 0.5rem; }
+
+
+/* ==== ESTILOS BÁSICOS PARA INPUTS ==== */
+input[readonly] {
+  background-color: #EEF4FF !important;
+  border-color: #ced4da !important;
+  color: #495057 !important;
+  cursor: not-allowed !important;
+  opacity: 0.9 !important;
+}
+
+input {
+  width: 100% !important;
+  border: 1px solid #ced4da !important;
+  background-color: #fff !important;
+}
+
+
+/* ==== HEADER ==== */
+.cotizacion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: #1c224d;
+  color: white;
+  box-shadow: 0 4px 20px rgba(28, 34, 77, 0.2);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-height: 50px;
+}
+
+.header-left, .header-center, .header-right {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.header-left { justify-content: flex-start; flex: 0 0 auto; }
+.header-center { justify-content: center; flex: 1 1 auto; min-width: 200px; }
+.header-right { justify-content: flex-end; gap: 0.75rem; flex: 0 0 auto; flex-wrap: wrap; }
+
+.detail-title {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: white;
+}
+
+.cliente-info {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.cliente-label, .cliente-value {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* ==== LAYOUT ==== */
+.two-column-layout {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 1rem;
+  padding: 0.125rem;
+  align-items: stretch;
+}
+
+.section-title-header {
+  background: #B7CAFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  min-height: 3rem;
+}
+
+.info-fields-section-three-columns {
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.info-fields-section-colum {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: 0.25rem;
+}
+
+/* ==== P-INPUTGROUP ==== */
+::ng-deep .p-inputgroup {
+  width: 100% !important;
+  margin-bottom: 0.25rem !important;
+}
+
+::ng-deep .p-inputgroup-addon {
+  background-color: #f8f9fa !important;
+  border-color: #dee2e6 !important;
+  color: #83838350 !important;
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.875rem !important;
+}
+
+
+/* ==== IMAGEN ==== */
+.imagen-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 0.5rem;
+}
+
+.image-wrapper {
+  width: 100%;
+  text-align: center;
+}
+
+.no-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.placeholder-icon {
+  font-size: 2.5rem !important;
+  color: #d1d5db !important;
+  margin-bottom: 0.5rem;
+}
+
+.placeholder-text {
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+  color: #4b5563;
+}
+
+.placeholder-hint {
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+/* ==== ESTADO SIN DATOS ==== */
+.no-data-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-radius: 12px;
+  margin: 0.5rem;
+}
+
+.no-data-content {
+  text-align: center;
+  max-width: 100vh;
+  padding: 1rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+}
+
+
+/* ==== PRIMENG ==== */
+::ng-deep .progress-thin {
+  height: 4px !important;
+  background-color: #e5e7eb !important;
+}
+
+::ng-deep .progress-thin .p-progressbar-value {
+  background-color: #6366f1 !important;
+}
+
+::ng-deep .cotizacion-image-responsive {
+  max-width: 100% !important;
+  max-height: 400px !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+}
+
+::ng-deep .info-fields-card .p-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem !important;
+}
+
+::ng-deep .imagen-container .p-image img {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: auto !important;
+  height: 400px !important;
+  object-fit: contain !important;
+}
+
+/* ==== COMPONENTES ==== */
+.tab-panel-content {
+  padding: 0.5rem;
+  min-height: 300px;
+}
+
+.detail-card {
+  margin-bottom: 0.5rem;
+}
+
+.column-1 {
+  flex: 1;
+  min-width: 0;
+}
+
+.column-2 {
+  flex: 0 0 300px;
+  min-width: 0;
+}
+
+.main-content-wrapper {
+  margin-top: 0.5rem;
+}
+
+/* ==== RESPONSIVO ==== */
+::ng-deep .p-tablist {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  white-space: nowrap !important;
+  scrollbar-width: thin;
+  scrollbar-color: #1c224d #f1f5f9;
+  -webkit-overflow-scrolling: touch;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+}
+
+@media (min-width: 900px) and (max-width: 1200px) {
+  .two-column-layout {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .cotizacion-header {
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 0.25rem;
+    text-align: center;
+  }
+
+  .header-left, .header-center, .header-right {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 900px) {
+  ::ng-deep .custom-toolbar .p-button .p-button-label {
+    display: none !important;
+  }
+
+  ::ng-deep .custom-toolbar {
+    min-width: 300px !important;
+    padding: 0.5rem !important;
+  }
+
+  ::ng-deep p-toolbar .p-button {
+    padding: 0.3rem !important;
+  }
+
+  ::ng-deep .custom-toolbar .p-inputnumber {
+    height: 36px !important;
+  }
+
+  .two-column-layout {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .cotizacion-header {
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 0.25rem;
+    text-align: center;
+  }
+
+  .header-left, .header-center, .header-right {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .header-left { order: 1; }
+  .header-center { order: 2; min-width: auto; }
+  .header-right { order: 3; }
+
+  .detail-title {
+    font-size: 1.1rem;
+  }
+
+  .cliente-info {
+    padding: 0.25rem 0.5rem;
+    border-radius: 16px;
+    font-size: 0.9rem;
+  }
+
+  .info-fields-section-three-columns {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.25rem;
+  }
+
+  ::ng-deep .p-inputgroup {
+    margin-bottom: 0.25rem !important;
+  }
+
+
+  input {
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.8rem !important;
+  }
+
+}
+
+@media (max-width: 480px) {
+  .cotizacion-header {
+    padding: 0.25rem 0.125rem;
+    gap: 0.25rem;
+  }
+
+  .detail-title {
+    font-size: 1rem;
+  }
+
+  .cliente-info {
+    padding: 0.2rem 0.4rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+  }
+
+  .cliente-label, .cliente-value {
+    font-size: 0.75rem;
+  }
+
+  ::ng-deep .cotizacion-header .p-tag {
+    font-size: 0.75rem !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+
+  ::ng-deep .cotizacion-header .p-splitbutton {
+    font-size: 0.75rem !important;
+  }
+
+  ::ng-deep .cotizacion-header .p-splitbutton .p-button {
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  ::ng-deep .info-fields-card .p-card-body {
+    padding: 0.125rem !important;
+  }
+
+  .info-fields-section-three-columns {
+    padding: 0.125rem;
+    gap: 0.25rem;
+  }
+
+  ::ng-deep .p-inputgroup {
+    margin-bottom: 0.125rem !important;
+  }
+
+  ::ng-deep .p-inputgroup-addon {
+    padding: 0.1rem 0.3rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  input {
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+/* ==== RESUMEN FINANCIERO ==== */
+.total-section-display {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-top: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.total-row-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.total-row-display .total-label-display {
+  font-weight: 600;
+  color: #4b5563;
+  font-size: 0.95rem;
+  flex: 0 0 auto;
+}
+
+.total-row-display .total-value-display {
+  font-weight: 700;
+  color: #1c224d;
+  font-size: 1.1rem;
+  text-align: right;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  flex: 0 0 auto;
+}
+
+/* Estilo especial para el total general */
+.total-final-display {
+  border-top: 2px solid #B7CAFF;
+  padding-top: 0.75rem !important;
+  margin-top: 0.5rem;
+}
+
+.total-final-display .total-label-display {
+  color: #1c224d;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.total-final-display .total-value-display {
+  color: #1c224d;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  .total-section-display {
+    padding: 1rem;
+    gap: 0.5rem;
+  }
+
+  .total-section-display .total-label-display {
+    font-size: 0.9rem;
+  }
+
+  .total-section-display .total-value-display {
+    font-size: 1rem;
+  }
+
+  .total-section-display .total-value-display:last-of-type {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .total-section-display {
+    padding: 0.75rem;
+    gap: 0.4rem;
+  }
+
+  .total-section-display .total-label-display {
+    font-size: 0.85rem;
+    min-width: 100px;
+  }
+
+  .total-section-display .total-value-display {
+    font-size: 0.95rem;
+  }
+
+  .total-section-display .total-label-display:last-of-type {
+    font-size: 1rem;
+  }
+
+  .total-section-display .total-value-display:last-of-type {
+    font-size: 1.1rem;
+    padding-top: 0.5rem;
+  }
+}
+
+.observaciones-container{
+  width: 100%;
+}
+
+.observaciones-container .p-textarea{
+  width: 100% !important;
+}
+
+/* ==== ESTILOS PARA SERVICIOS ==== */
+.servicio-suggestion-item {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.2s ease;
+}
+
+.servicio-suggestion-item:hover {
+  background-color: #f8fafc;
+}
+
+.servicio-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.servicio-id {
+  background: #1c224d;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.servicio-nombre {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.servicio-descripcion {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.servicio-precio {
+  color: #059669;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.servicio-selected-card {
+  margin-top: 0.75rem;
+  border: 2px solid #10b981;
+  border-radius: 8px;
+}
+
+::ng-deep .servicio-selected-card .p-card-header {
+  background: #ecfdf5;
+  border-bottom: 1px solid #a7f3d0;
+}
+
+.servicio-header {
+  display: flex;
+  align-items: center;
+  color: #065f46;
+}
+
+.servicio-info {
+  padding: 0.75rem 0;
+}
+
+.servicio-info p {
+  margin: 0.5rem 0;
+  color: #374151;
+}
+
+.servicio-info strong {
+  color: #1f2937;
+}
+
+.total-preview {
+  background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+  border: 2px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 0.75rem;
+}
+
+/* Mejoras para campos de entrada */
+::ng-deep .p-inputnumber input {
+  text-align: right !important;
+}
+
+::ng-deep .p-autocomplete-input {
+  width: 100% !important;
+}
+
+/* Estilos para validación */
+.p-error {
+  color: #dc2626 !important;
+  font-size: 0.8rem !important;
+  margin-top: 0.25rem !important;
+}
+
+.p-help {
+  color: #6b7280 !important;
+  font-size: 0.75rem !important;
+  margin-top: 0.25rem !important;
+}
+
+/* ==== SOLUCION PARA PROBLEMA DEL DROPDOWN AUTOCOMPLETE ==== */
+/* Prevenir el cierre automático del dropdown en hover */
+::ng-deep .p-autocomplete-panel {
+  z-index: 9999 !important;
+  position: fixed !important;
+  pointer-events: auto !important;
+}
+
+::ng-deep .p-autocomplete-items {
+  pointer-events: auto !important;
+  overflow-y: auto !important;
+  max-height: 300px !important;
+}
+
+::ng-deep .p-autocomplete-item {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* Prevenir interferencia con eventos del mouse */
+::ng-deep .p-autocomplete-dropdown {
+  pointer-events: auto !important;
+  z-index: 1 !important;
+}
+
+/* Asegurar que el overlay no se cierre por eventos del mouse */
+::ng-deep .p-autocomplete .p-overlay {
+  pointer-events: auto !important;
+}
+
+/* Estabilizar el comportamiento del dropdown */
+::ng-deep .p-autocomplete {
+  position: relative !important;
+}
+
+::ng-deep .p-autocomplete-input {
+  width: 100% !important;
+  pointer-events: auto !important;
+}
+
+/* Mejorar la interacción con los items del dropdown */
+::ng-deep .p-autocomplete-item:hover {
+  background-color: #f8fafc !important;
+  color: #1f2937 !important;
+}
+
+/* Prevenir que el hover cause problemas */
+.servicio-suggestion-item {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  transition: none !important; /* Remover transición que puede causar problemas */
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.servicio-suggestion-item:hover {
+  background-color: #f8fafc !important;
+  transition: none !important; /* Sin transición para evitar conflictos */
+}
+
+/* ==== ESTILOS ADICIONALES PARA ESTABILIZAR EL DROPDOWN ==== */
+/* Evitar que el dropdown se cierre por eventos inesperados */
+::ng-deep .p-autocomplete-dropdown:hover,
+::ng-deep .p-autocomplete-dropdown:focus {
+  outline: none !important;
+}
+
+/* Asegurar comportamiento estable del overlay */
+::ng-deep .p-autocomplete-panel .p-autocomplete-items {
+  background: white !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Evitar parpadeos o cambios de estado inesperados */
+::ng-deep .p-autocomplete.p-component {
+  position: relative !important;
+}
+
+::ng-deep .p-autocomplete .p-inputtext {
+  border-radius: 6px !important;
+}
+
+/* Mejorar la estabilidad del panel cuando está abierto */
+::ng-deep .p-autocomplete-panel.p-connected-overlay-enter-active,
+::ng-deep .p-autocomplete-panel.p-connected-overlay-enter-from {
+  opacity: 1 !important;
+  transform: scaleY(1) !important;
+}
+
+/* Prevenir que elementos padre interfieran */
+::ng-deep .p-dialog .p-autocomplete-panel {
+  position: fixed !important;
+  z-index: 99999 !important;
+}
+
+/* Responsive para el diálogo de servicios */
+@media (max-width: 768px) {
+  .servicio-suggestion-item {
+    padding: 0.5rem;
+  }
+
+  .servicio-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .servicio-id {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .servicio-nombre {
+    font-size: 0.9rem;
+  }
+
+  .servicio-descripcion {
+    font-size: 0.8rem;
+  }
+
+  .servicio-precio {
+    font-size: 0.85rem;
+  }
+
+  /* Ajustar z-index en móviles */
+  ::ng-deep .p-autocomplete-panel {
+    z-index: 999999 !important;
+  }
+}

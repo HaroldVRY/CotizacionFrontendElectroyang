@@ -8,21 +8,24 @@ import { ServiciosComponent } from './servicios/servicios.component';
 import { CreacionComponent } from './mant-cons/creacion/creacion.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PrimeNgModule } from '../../prime-ng/prime-ng.module';
-
+import { DialogItemComponent } from './mant-cons/dialog-item/dialog-item.component';
+import { SharedModule } from '../../shared/shared.module';
 
 @NgModule({
   declarations: [
     ClientesComponent,
     MantConsComponent,
     CreacionComponent,
-    ServiciosComponent
+    ServiciosComponent,
+    DialogItemComponent
   ],
   imports: [
     CommonModule,
     PrimeNgModule,
     CotizarRoutingModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    SharedModule
   ],
   providers: [
     ConfirmationService,

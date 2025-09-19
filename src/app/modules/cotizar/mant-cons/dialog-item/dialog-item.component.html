@@ -1,0 +1,120 @@
+<form [formGroup]="agregarItemForm" (ngSubmit)="confirmar()">
+  <div class="formgrid grid">
+    <!-- ID del Servicio -->
+    <div class="field col-12 md:col-4">
+      <label for="servicioId" class="field-label">ID del Servicio:</label>
+      <p-inputNumber id="servicioId" formControlName="servicioId" [min]="1" [useGrouping]="false"
+        placeholder="Ingrese ID (opcional)"
+        [class.p-invalid]="agregarItemForm.get('servicioId')?.invalid && agregarItemForm.get('servicioId')?.touched"
+        styleClass="w-full" (onInput)="onServicioIdChange($event)">
+      </p-inputNumber>
+      <small class="p-help">
+        Ingrese el ID del servicio para autocompletar
+      </small>
+    </div>
+
+    <!-- Cantidad -->
+    <div class="field col-12 md:col-4">
+      <label for="cantidad" class="field-label required">Cantidad:</label>
+      <p-inputNumber id="cantidad" formControlName="cantidad" [min]="1" [max]="999999"
+        placeholder="Ingrese la cantidad"
+        [class.p-invalid]="agregarItemForm.get('cantidad')?.invalid && agregarItemForm.get('cantidad')?.touched"
+        styleClass="w-full">
+      </p-inputNumber>
+      <small *ngIf="agregarItemForm.get('cantidad')?.invalid && agregarItemForm.get('cantidad')?.touched"
+        class="p-error">
+        La cantidad es requerida y debe ser mayor a 0
+      </small>
+    </div>
+
+    <!-- Precio Unitario -->
+    <div class="field col-12 md:col-4">
+      <label for="precioUnitario" class="field-label required">Precio Unitario:</label>
+      <p-inputNumber id="precioUnitario" formControlName="precioUnitario" mode="currency" currency="PEN"
+        locale="es-PE" [min]="0" [minFractionDigits]="2" [maxFractionDigits]="2" placeholder="0.00"
+        [class.p-invalid]="agregarItemForm.get('precioUnitario')?.invalid && agregarItemForm.get('precioUnitario')?.touched"
+        styleClass="w-full">
+      </p-inputNumber>
+      <small *ngIf="agregarItemForm.get('precioUnitario')?.invalid && agregarItemForm.get('precioUnitario')?.touched"
+        class="p-error">
+        El precio unitario es requerido
+      </small>
+    </div>
+
+    <!-- Descripción con AutoComplete -->
+    <div class="field col-12">
+      <label for="descripcion" class="field-label required">Descripción:</label>
+      <p-autoComplete id="descripcion" formControlName="descripcion" [suggestions]="serviciosSugeridos"
+        (completeMethod)="buscarServicios($event)" field="descripcion"
+        placeholder="Busque un servicio por descripción o seleccione del listado" [minLength]="1" [delay]="300"
+        [showEmptyMessage]="true" emptyMessage="No se encontraron servicios" [forceSelection]="false"
+        [class.p-invalid]="agregarItemForm.get('descripcion')?.invalid && agregarItemForm.get('descripcion')?.touched"
+        styleClass="w-full" (onSelect)="onServicioSeleccionado($event)" (onClear)="onDescripcionClear()"
+        [dropdown]="true" (onDropdownClick)="onDropdownClick()" [autoHighlight]="true" scrollHeight="300px"
+        appendTo="body" [baseZIndex]="10000">
+
+        <ng-template let-servicio pTemplate="item">
+          <div class="servicio-suggestion-item">
+            <div class="servicio-header">
+              <span class="servicio-id">ID: {{ servicio.id }}</span>
+              <span class="servicio-nombre">{{ servicio.nombre }}</span>
+            </div>
+            <div class="servicio-descripcion">{{ servicio.descripcion }}</div>
+            <div class="servicio-precio">{{ servicio.precio | currency:'S/.':'symbol':'1.2-2' }} / {{ servicio.unidad }}</div>
+          </div>
+        </ng-template>
+      </p-autoComplete>
+      <small *ngIf="agregarItemForm.get('descripcion')?.invalid && agregarItemForm.get('descripcion')?.touched"
+        class="p-error">
+        La descripción es requerida
+      </small>
+      <small *ngIf="!agregarItemForm.get('descripcion')?.invalid" class="p-help">
+        Escriba para buscar por descripción o haga clic en la flecha para ver todos los servicios
+      </small>
+    </div>
+
+    <!-- Información del servicio seleccionado -->
+    <div *ngIf="servicioSeleccionado" class="field col-12">
+      <p-card styleClass="servicio-selected-card">
+        <ng-template pTemplate="header">
+          <div class="servicio-header">
+            <i class="pi pi-check-circle text-green-600 mr-2"></i>
+            <span class="font-semibold">Servicio Seleccionado</span>
+          </div>
+        </ng-template>
+        <div class="servicio-info">
+          <p><strong>Nombre:</strong> {{ servicioSeleccionado.nombre }}</p>
+          <p><strong>Precio sugerido:</strong> {{ servicioSeleccionado.precio | currency:'S/.':'symbol':'1.2-2' }}</p>
+          <p><strong>Unidad:</strong> {{ servicioSeleccionado.unidad }}</p>
+        </div>
+      </p-card>
+    </div>
+
+    <!-- Total calculado -->
+    <div class="field col-12">
+      <p-divider></p-divider>
+      <div class="total-preview">
+        <div class="flex justify-content-between align-items-center">
+          <span class="text-lg font-semibold">Total del Item:</span>
+          <span class="text-xl font-bold text-primary">
+            {{ calcularTotalItem() | currency:'S/.':'symbol':'1.2-2' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<!-- Footer con botones -->
+<p-footer class="p-dialog-footer">
+  <div class="flex justify-content-end gap-2">
+    <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [text]="true"
+      (onClick)="cancelar()">
+    </p-button>
+    <p-button [label]="labelBotonPrincipal"
+      [icon]="iconoBotonPrincipal" severity="success" [loading]="guardandoItem"
+      [disabled]="agregarItemForm.invalid || guardandoItem"
+      (onClick)="confirmar()">
+    </p-button>
+  </div>
+</p-footer>

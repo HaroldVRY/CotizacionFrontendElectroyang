@@ -1,0 +1,44 @@
+<div class="p-field body">
+  <!-- <i [class]="'pi ' + icono"
+     [ngClass]="{
+       'icon-error': severidad === 'error',
+       'p-text-success': severidad === 'success',
+       'p-text-warning': severidad === 'warn'
+     }"></i> -->
+  <span>{{ mensaje }}</span>
+</div>
+
+<p-footer
+  class="p-dialog-footer flex align-items-center justify-content-center p-0"
+>
+  <!-- Mostrar botones de confirmación si mostrarBotones es true -->
+  <div class="button-group" *ngIf="mostrarBotones">
+    <p-button
+      pButton
+      type="button"
+      class="p-button-custom p-button-success"
+      [label]="labelAceptar"
+      [title]="labelAceptar"
+      (click)="aceptar()"
+    ></p-button>
+    <p-button
+      pButton
+      type="button"
+      class="p-button-custom p-button-secondary"
+      [label]="labelCerrar"
+      [title]="labelCerrar"
+      (click)="cerrar()"
+    ></p-button>
+  </div>
+
+  <!-- Botón simple para comportamiento original -->
+  <p-button
+    *ngIf="!mostrarBotones"
+    pButton
+    type="button"
+    class="p-button-custom"
+    label="Cerrar"
+    title="Cerrar"
+    (click)="cerrar()"
+  ></p-button>
+</p-footer>
