@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MessageService } from 'primeng/api';
-import { environment } from '../../../../environments/environment';
+import { Subject } from 'rxjs';
+import { takeUntil, finalize } from 'rxjs/operators';
+import { ServicioService } from '../../../service/servicio.service';
+import { RequestHandlerService } from '../../../shared/services/request-handler.service';
 import { Servicio } from '../interface/cotizacion.interface';
 
 @Component({
@@ -11,22 +13,51 @@ import { Servicio } from '../interface/cotizacion.interface';
   styleUrl: './servicios.component.css',
   providers: [MessageService]
 })
-export class ServiciosComponent implements OnInit {
+export class ServiciosComponent implements OnInit, OnDestroy {
   servicios: Servicio[] = [];
   serviciosFiltrados: Servicio[] = [];
   loading = false;
   busquedaGlobal = '';
+  rows = 10;
+
+  // Control de filtros
+  filtrosVisibles = false;
 
   // Campos para filtros específicos
   filtroNombre = '';
   filtroDescripcion = '';
   filtroPrecio = '';
+  filtroUnidad = '';
   filtroActivo: boolean | null = null;
 
-  private readonly API_URL = environment.apiUrl || 'http://localhost:3000/api';
+  // Opciones para el dropdown de estado
+  estadoOptions = [
+    { label: 'Todos', value: null },
+    { label: 'Activo', value: true },
+    { label: 'Inactivo', value: false }
+  ];
+
+  // Columnas de la tabla
+  columnasDinamicas = [
+    { field: 'id', header: 'ID', sortable: true, filtrable: false, tipo: 'numero', ancho: '80px' },
+    { field: 'nombre', header: 'Nombre', sortable: true, filtrable: true, tipo: 'texto', ancho: '200px' },
+    { field: 'descripcion', header: 'Descripción', sortable: false, filtrable: true, tipo: 'texto', ancho: '300px' },
+    { field: 'precio', header: 'Precio', sortable: true, filtrable: true, tipo: 'texto', ancho: '120px' },
+    { field: 'unidad', header: 'Unidad', sortable: true, filtrable: true, tipo: 'texto', ancho: '100px' },
+    { field: 'activo', header: 'Estado', sortable: true, filtrable: true, tipo: 'dropdown', ancho: '100px' },
+    { field: 'acciones', header: 'Acciones', sortable: false, filtrable: false, tipo: 'acciones', ancho: '120px' }
+  ];
+
+  // Columnas visibles (sin acciones)
+  get columnasDinamicasVisibles() {
+    return this.columnasDinamicas.filter(col => col.field !== 'acciones');
+  }
+
+  private destroy$ = new Subject<void>();
 
   constructor(
-    private http: HttpClient,
+    private servicioService: ServicioService,
+    private requestHandler: RequestHandlerService,
     private messageService: MessageService
   ) { }
 
@@ -34,33 +65,31 @@ export class ServiciosComponent implements OnInit {
     this.cargarServicios();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   cargarServicios(): void {
     this.loading = true;
-    const url = `${this.API_URL}/servicios`;
 
-    this.http.get<{success: boolean, data: Servicio[]}>(url).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.servicios = response.data;
-          this.serviciosFiltrados = [...this.servicios];
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Éxito',
-            detail: `Se cargaron ${this.servicios.length} servicios`
-          });
+    this.requestHandler.handle(this.servicioService.getServicios())
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.loading = false)
+      )
+      .subscribe({
+        next: (response: any) => {
+          if (response.success) {
+            this.servicios = response.data;
+            this.serviciosFiltrados = [...this.servicios];
+            this.requestHandler.showSuccess(`Se cargaron ${this.servicios.length} servicios`);
+          }
+        },
+        error: (error: any) => {
+          console.error('Error al cargar servicios:', error);
         }
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error al cargar servicios:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Error al cargar la lista de servicios'
-        });
-        this.loading = false;
-      }
-    });
+      });
   }
 
   onBusquedaGlobal(): void {
@@ -84,11 +113,132 @@ export class ServiciosComponent implements OnInit {
       const filtroPrecioMatch = this.filtroPrecio === '' ||
         servicio.precio.toString().includes(this.filtroPrecio);
 
+      const filtroUnidadMatch = this.filtroUnidad === '' ||
+        servicio.unidad.toLowerCase().includes(this.filtroUnidad.toLowerCase());
+
       const filtroActivoMatch = this.filtroActivo === null ||
         servicio.activo === this.filtroActivo;
 
       return busquedaGlobalMatch && filtroNombreMatch && filtroDescripcionMatch &&
-             filtroPrecioMatch && filtroActivoMatch;
+             filtroPrecioMatch && filtroUnidadMatch && filtroActivoMatch;
+    });
+  }
+
+  /**
+   * Alternar visibilidad de filtros por columna
+   */
+  toggleFiltros(): void {
+    this.filtrosVisibles = !this.filtrosVisibles;
+    if (!this.filtrosVisibles) {
+      this.limpiarFiltrosColumna();
+    }
+  }
+
+  /**
+   * Limpiar todos los filtros (búsqueda global y por columna)
+   */
+  clear(table: any, searchInput: any): void {
+    // Limpiar búsqueda global
+    this.busquedaGlobal = '';
+    if (searchInput) {
+      searchInput.value = '';
+    }
+
+    // Limpiar filtros por columna
+    this.limpiarFiltrosColumna();
+
+    // Limpiar tabla usando PrimeNG
+    if (table) {
+      table.clear();
+    }
+
+    // Aplicar filtros limpios
+    this.aplicarFiltrosLocales();
+  }
+
+  /**
+   * Limpiar filtros por columna
+   */
+  private limpiarFiltrosColumna(): void {
+    this.filtroNombre = '';
+    this.filtroDescripcion = '';
+    this.filtroPrecio = '';
+    this.filtroUnidad = '';
+    this.filtroActivo = null;
+  }
+
+  /**
+   * Manejar eventos de filtrado de la tabla (para compatibilidad)
+   */
+  onTableFilter(event?: any): void {
+    // Método requerido por el template para eventos de filtrado
+    if (event && event.target) {
+      this.busquedaGlobal = event.target.value;
+      this.aplicarFiltrosLocales();
+    }
+  }
+
+  /**
+   * Obtener campos para filtro global
+   */
+  getGlobalFilterFields(): string[] {
+    return this.columnasDinamicas
+      .filter(col => col.filtrable)
+      .map(col => col.field);
+  }
+
+  /**
+   * Aplicar filtros (alias para compatibilidad con template)
+   */
+  aplicarFiltros(): void {
+    this.aplicarFiltrosLocales();
+  }
+
+  /**
+   * Editar servicio
+   */
+  editarServicio(servicio: Servicio): void {
+    // TODO: Implementar navegación a formulario de edición
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Función pendiente',
+      detail: `Editar servicio: ${servicio.nombre}`
+    });
+  }
+
+  /**
+   * Eliminar servicio
+   */
+  eliminarServicio(servicio: Servicio): void {
+    // TODO: Implementar confirmación y eliminación
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Función pendiente',
+      detail: `Eliminar servicio: ${servicio.nombre}`
+    });
+  }
+
+  /**
+   * Crear nuevo servicio
+   */
+  nuevoServicio(): void {
+    // TODO: Implementar navegación a formulario de creación de servicio
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Función pendiente',
+      detail: 'La funcionalidad de crear servicio será implementada próximamente'
+    });
+  }
+
+  /**
+   * Ver detalle de servicio
+   */
+  verDetalle(servicio: Servicio): void {
+    // TODO: Implementar navegación a detalle del servicio
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Ver Servicio',
+      detail: `Mostrando detalles de: ${servicio.nombre}`
     });
   }
 
@@ -97,6 +247,7 @@ export class ServiciosComponent implements OnInit {
     this.filtroNombre = '';
     this.filtroDescripcion = '';
     this.filtroPrecio = '';
+    this.filtroUnidad = '';
     this.filtroActivo = null;
     this.serviciosFiltrados = [...this.servicios];
   }

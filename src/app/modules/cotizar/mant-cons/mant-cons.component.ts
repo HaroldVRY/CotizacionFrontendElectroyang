@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { CotizacionService } from '../../../service/cotizacion.service';
+import { ReporteService } from '../../../service/reporte.service';
 import { Cotizacion, PaginatedResponse } from '../../../modules/cotizar/interface/cotizacion.interface';
 
 @Component({
@@ -61,10 +62,16 @@ export class MantConsComponent implements OnInit, OnDestroy {
     { field: 'acciones', header: 'Acciones', sortable: false, filtrable: false, tipo: 'acciones' }
   ];
 
+  // Columnas visibles (sin acciones)
+  get columnasDinamicasVisibles() {
+    return this.columnasDinamicas.filter(col => col.field !== 'acciones');
+  }
+
   private destroy$ = new Subject<void>();
 
   constructor(
     private cotizacionService: CotizacionService,
+    private reporteService: ReporteService,
     private router: Router,
     private route: ActivatedRoute,
     private messageService: MessageService,
@@ -166,14 +173,7 @@ export class MantConsComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Duplicar cotización
-   */
-  duplicarCotizacion(cotizacion: Cotizacion): void {
-    this.router.navigate(['/cotizar/mantenimiento-consulta/creacion'], {
-      queryParams: { id: cotizacion.id, modo: 'duplicar' }
-    });
-  }
+
 
   /**
    * Eliminar cotización
@@ -226,32 +226,19 @@ export class MantConsComponent implements OnInit, OnDestroy {
       detail: 'Por favor espere...'
     });
 
-    this.cotizacionService.generarReporte(cotizacion.id)
+    this.reporteService.generarYDescargarPDF(cotizacion.id!, `cotizacion-${cotizacion.numero}`)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (blob: Blob) => {
-          if (blob.size > 0) {
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `cotizacion-${cotizacion.numero}.pdf`;
-            link.click();
-            window.URL.revokeObjectURL(url);
-
+        next: (success: boolean) => {
+          if (success) {
             this.messageService.add({
               severity: 'success',
               summary: 'Éxito',
               detail: 'Reporte generado y descargado correctamente'
             });
-          } else {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'El archivo PDF está vacío'
-            });
           }
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error al generar reporte:', error);
           let errorMessage = 'Error desconocido al generar el reporte';
 

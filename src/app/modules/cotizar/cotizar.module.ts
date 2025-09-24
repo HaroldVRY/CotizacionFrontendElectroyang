@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ConfirmationService, MessageService } from 'primeng/api';
 import { CotizarRoutingModule } from './cotizar-routing.module';
 import { ClientesComponent } from './clientes/clientes.component';
 import { MantConsComponent } from './mant-cons/mant-cons.component';
@@ -28,8 +27,7 @@ import { SharedModule } from '../../shared/shared.module';
     SharedModule
   ],
   providers: [
-    ConfirmationService,
-    MessageService
+    // Los servicios MessageService y ConfirmationService ahora están disponibles globalmente desde AppModule
   ]
 })
 export class CotizarModule { }

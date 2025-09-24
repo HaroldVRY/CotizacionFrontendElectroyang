@@ -78,14 +78,20 @@ export interface Servicio {
 }
 
 export interface CreateCotizacionRequest {
-  cliente: string;
+  clienteId: number;
   receptor: string;
-  items: ItemCotizacion[];
   observaciones?: string;
   tiempoEntrega: string;
   formaPago: string;
-  banco?: Banco;
-  mostrarDatosBancarios?: boolean;
+  detalles: DetalleItem[];
+}
+
+export interface DetalleItem {
+  servicioId?: number | null;
+  numeroItem: number;
+  cantidad: number;
+  descripcion: string;
+  precioUnitario: number;
 }
 
 export interface ApiResponse<T> {
@@ -101,4 +107,41 @@ export interface PaginatedResponse<T> {
   page: number;
   limit: number;
   totalPages: number;
+}
+
+// Interfaces para Usuario
+export interface Usuario {
+  id: number;
+  nombre: string;
+  email: string;
+  rol: 'admin' | 'vendedor' | 'gerente';
+  activo: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  data?: {
+    usuario: Usuario;
+    token: string;
+    expiresIn: number;
+  };
+  message?: string;
+  error?: string;
+}
+
+// Tipos de errores de validación
+export interface ValidationError {
+  field: string;
+  message: string;
+  code: string;
+}
+
+export interface ApiErrorResponse {
+  success: false;
+  error: string;
+  message?: string;
+  details?: ValidationError[];
+  statusCode?: number;
 }

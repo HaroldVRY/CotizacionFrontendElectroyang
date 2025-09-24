@@ -1,11 +1,14 @@
 /* Estilos para el contenido principal */
 .content {
   transition: margin-left 0.3s ease; /* Transición suave para el cambio de margen */
+  padding-bottom: 60px; /* Espacio para el footer fijo */
+  min-height: calc(100vh - 60px); /* Altura mínima para que el contenido use toda la pantalla menos el footer */
 }
 
 /* Para pantallas pequeñas (responsive), asegurarse de que el content ocupe todo el espacio disponible */
 @media (max-width: 1000px) {
   .content {
     margin-left: 0; /* El sidebar no debe ocupar espacio en pantallas pequeñas */
+    padding-bottom: 60px; /* Mantener espacio para el footer */
   }
 }

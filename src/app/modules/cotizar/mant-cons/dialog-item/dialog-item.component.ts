@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { MessageService } from 'primeng/api';
 import { CotizacionService } from '../../../../service/cotizacion.service';
+import { ServicioService } from '../../../../service/servicio.service';
 import { Servicio, ApiResponse, ItemCotizacion } from '../../../cotizar/interface/cotizacion.interface';
 
 @Component({
@@ -34,6 +35,7 @@ export class DialogItemComponent implements OnInit {
     private ref: DynamicDialogRef,
     private config: DynamicDialogConfig,
     private cotizacionService: CotizacionService,
+    private servicioService: ServicioService,
     private messageService: MessageService
   ) {
     this.initForm();
@@ -90,13 +92,13 @@ export class DialogItemComponent implements OnInit {
    */
   private loadServicios(): void {
     if (!this.servicios || this.servicios.length === 0) {
-      this.cotizacionService.getServicios().subscribe({
-        next: (response: ApiResponse<Servicio[]>) => {
+      this.servicioService.getServicios().subscribe({
+        next: (response: any) => {
           if (response.success) {
             this.servicios = response.data || [];
           }
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error al cargar servicios:', error);
         }
       });
@@ -109,8 +111,8 @@ export class DialogItemComponent implements OnInit {
   buscarServicios(event: any): void {
     const query = event.query;
     if (query && query.length >= 1) {
-      this.cotizacionService.buscarServiciosPorDescripcion(query).subscribe({
-        next: (response: ApiResponse<Servicio[]>) => {
+      this.servicioService.buscarServiciosPorDescripcion(query).subscribe({
+        next: (response: any) => {
           if (response.success) {
             this.serviciosSugeridos = response.data || [];
           }
@@ -145,8 +147,8 @@ export class DialogItemComponent implements OnInit {
     const servicioId = event.value;
     if (servicioId && servicioId > 0) {
       // Buscar el servicio por ID
-      this.cotizacionService.getServicioPorId(servicioId).subscribe({
-        next: (response: ApiResponse<Servicio>) => {
+      this.servicioService.getServicioById(servicioId).subscribe({
+        next: (response: any) => {
           if (response.success && response.data) {
             this.servicioSeleccionado = response.data;
             this.agregarItemForm.patchValue({
@@ -188,8 +190,8 @@ export class DialogItemComponent implements OnInit {
       if (this.servicios && this.servicios.length > 0) {
         this.serviciosSugeridos = [...this.servicios];
       } else {
-        this.cotizacionService.getServicios().subscribe({
-          next: (response: ApiResponse<Servicio[]>) => {
+        this.servicioService.getServicios().subscribe({
+          next: (response: any) => {
             if (response.success) {
               this.serviciosSugeridos = response.data || [];
               this.servicios = response.data || [];

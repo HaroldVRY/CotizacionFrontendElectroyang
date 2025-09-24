@@ -104,6 +104,12 @@
   --letter-spacing-wider: 0.05em; /* Para texto en mayúsculas */
 }
 
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: "Anek Latin", sans-serif !important;
 }

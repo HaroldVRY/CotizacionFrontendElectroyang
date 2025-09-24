@@ -41,8 +41,7 @@
   <ng-template pTemplate="header">
     <tr class="text-center">
       <!-- Columnas dinámicas (explícitas) -->
-      <th *ngFor="let col of columnasDinamicas" [pSortableColumn]="col.sortable ? col.field : undefined"
-        [style.width]="col.field === 'acciones' ? '200px' : 'auto'">
+      <th *ngFor="let col of columnasDinamicasVisibles" [pSortableColumn]="col.sortable ? col.field : undefined">
         <div class="d-flex gap-1 align-items-center justify-content-center">
           {{ col.header }}
           <p-sortIcon *ngIf="col.sortable" [field]="col.field">
@@ -57,7 +56,7 @@
     </tr>
     <!-- Fila de filtros dinámicos -->
     <tr class="filtro" [ngClass]="{'d-none': !filtrosVisibles}">
-      <th *ngFor="let col of columnasDinamicas">
+      <th *ngFor="let col of columnasDinamicasVisibles">
         <div class="w-100 p-1" *ngIf="col.filtrable">
           <input *ngIf="col.field === 'numero'" type="text" pInputText pSize="small" class="w-100 filtro-columna-input"
             [(ngModel)]="filtroNumero"
@@ -93,73 +92,20 @@
 
   <!-- Cuerpo dinámico -->
   <ng-template pTemplate="body" let-cotizacion let-rowIndex="rowIndex">
-    <tr>
-      <td *ngFor="let col of columnasDinamicas" class="cell-center">
-        <!-- Columna número -->
-        <span *ngIf="col.field === 'numero'" class="font-medium text-primary">
-          {{ cotizacion.numero }}
-        </span>
-
-        <!-- Columna fecha -->
-        <span *ngIf="col.field === 'fecha'">
-          {{ formatearFecha(cotizacion.fecha) }}
-        </span>
-
-        <!-- Columna cliente -->
-        <span *ngIf="col.field === 'cliente'">
-          {{ cotizacion.cliente }}
-        </span>
-
-        <!-- Columna receptor -->
-        <span *ngIf="col.field === 'receptor'">
-          {{ cotizacion.receptor }}
-        </span>
-
-        <!-- Columna estado -->
-        <p-tag *ngIf="col.field === 'estado'" [value]="getEstadoLabel(cotizacion.estado || 'borrador')"
-          [severity]="getEstadoSeverity(cotizacion.estado || 'borrador')">
-        </p-tag>
-
-        <!-- Columna total -->
-        <span *ngIf="col.field === 'precioTotal'" class="font-medium">
-          {{ cotizacion.precioTotalFormatted || 'S/ 0.00' }}
-        </span>
-
-        <!-- Columna acciones -->
-        <div *ngIf="col.field === 'acciones'" class="action-buttons">
-          <!-- Botón Ver -->
-          <p-button icon="pi pi-eye" severity="info" size="small" [text]="true" pTooltip="Ver detalle"
-            (onClick)="verDetalle(cotizacion)">
-          </p-button>
-
-          <!-- Botón Editar (solo si no está aprobada) -->
-          <p-button *ngIf="cotizacion.estado !== 'aprobada'" icon="pi pi-pencil" severity="secondary" size="small"
-            [text]="true" pTooltip="Editar" (onClick)="editarCotizacion(cotizacion)">
-          </p-button>
-
-          <!-- Botón Duplicar -->
-          <p-button icon="pi pi-copy" severity="secondary" size="small" [text]="true" pTooltip="Duplicar"
-            (onClick)="duplicarCotizacion(cotizacion)">
-          </p-button>
-
-          <!-- Botón PDF -->
-          <p-button icon="pi pi-file-pdf" severity="danger" size="small" [text]="true" pTooltip="Generar PDF"
-            (onClick)="generarReporte(cotizacion)">
-          </p-button>
-
-          <!-- Menú de más acciones -->
-          <p-menu #menuRef [model]="getMenuItems(cotizacion)" [popup]="true"></p-menu>
-
-          <p-button icon="pi pi-ellipsis-v" severity="secondary" size="small" [text]="true" pTooltip="Más acciones"
-            (onClick)="menuRef.toggle($event)">
-          </p-button>
-        </div>
+    <tr (click)="verDetalle(cotizacion)" style="cursor: pointer;" pTooltip="Click para ver detalles">
+      <td *ngFor="let col of columnasDinamicas" class="cell-center" [ngClass]="{'d-none': col.field === 'acciones'}">
+        <span *ngIf="col.field === 'numero'" class="font-medium text-primary">{{ cotizacion.numero }}</span>
+        <span *ngIf="col.field === 'fecha'">{{ formatearFecha(cotizacion.fecha) }}</span>
+        <span *ngIf="col.field === 'cliente'">{{ cotizacion.cliente }}</span>
+        <span *ngIf="col.field === 'receptor'">{{ cotizacion.receptor }}</span>
+        <p-tag *ngIf="col.field === 'estado'" [value]="getEstadoLabel(cotizacion.estado || 'borrador')" [severity]="getEstadoSeverity(cotizacion.estado || 'borrador')"></p-tag>
+        <span *ngIf="col.field === 'precioTotal'" class="font-medium">{{ cotizacion.precioTotalFormatted || 'S/ 0.00' }}</span>
       </td>
     </tr>
   </ng-template>
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td [attr.colspan]="columnasDinamicas.length" class="text-center p-4">
+      <td [attr.colspan]="columnasDinamicasVisibles.length" class="text-center p-4">
         <div class="empty-state">
           <i class="pi pi-inbox text-4xl text-gray-400 mb-3"></i>
           <p class="text-gray-600">No se encontraron cotizaciones</p>

@@ -1,220 +1,133 @@
-<div class="p-4">
-  <!-- Header -->
-  <div class="flex justify-content-between align-items-center mb-4">
-    <h2 class="text-2xl font-bold text-primary">Lista de Servicios</h2>
-    <p-button
-      label="Nuevo Servicio"
-      icon="pi pi-plus"
-      severity="success"
-      class="p-button-sm">
+<!-- Toast para mensajes -->
+<p-toast></p-toast>
+
+<p-toolbar styleClass="custom-toolbar">
+  <ng-template #start>
+    <div class="d-flex gap-2">
+      <p-iconfield iconPosition="left">
+        <p-inputicon>
+          <i class="pi pi-search"></i>
+        </p-inputicon>
+        <input #searchInput pInputText type="text"
+          (input)="dt1.filterGlobal(searchInput.value, 'contains'); onTableFilter()"
+          placeholder="Buscar servicio..." />
+      </p-iconfield>
+      <p-button styleClass="btn-info  btn-md" severity="info"
+        [icon]="filtrosVisibles ? 'pi pi-filter-slash' : 'pi pi-filter'" (click)="toggleFiltros()" label="Filtros" />
+      <p-button styleClass="btn-danger  btn-md" severity="danger" label="Limpiar Filtros" icon="pi pi-times"
+        (click)="clear(dt1, searchInput)" />
+    </div>
+  </ng-template>
+  <ng-template #center>
+    <h4>Lista de Servicios</h4>
+  </ng-template>
+  <ng-template #end>
+    <p-button label="Nuevo Servicio" icon="pi pi-plus" severity="success" (onClick)="nuevoServicio()">
     </p-button>
-  </div>
+  </ng-template>
+</p-toolbar>
 
-  <!-- Filtros -->
-  <p-card class="mb-4">
-    <ng-template pTemplate="content">
-      <div class="grid">
-        <!-- Búsqueda global -->
-        <div class="col-12 md:col-6 lg:col-4">
-          <label for="busquedaGlobal" class="block text-sm font-medium mb-2">Búsqueda General</label>
-          <span class="p-input-icon-left w-full">
-            <i class="pi pi-search"></i>
-            <input
-              pInputText
-              id="busquedaGlobal"
-              name="busquedaGlobal"
-              [(ngModel)]="busquedaGlobal"
-              (input)="onBusquedaGlobal()"
-              placeholder="Buscar en todos los campos..."
-              class="w-full">
-          </span>
+<p-divider></p-divider>
+
+<p-table #dt1 [value]="serviciosFiltrados" [loading]="loading" [paginator]="true" [rows]="rows"
+  [rowsPerPageOptions]="[10, 25, 50]" [showCurrentPageReport]="true"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+  [globalFilterFields]="['nombre', 'descripcion', 'precio', 'unidad']" styleClass="p-datatable-gridlines"
+  responsiveLayout="scroll" showGridlines>
+  <!-- Header -->
+  <ng-template pTemplate="header">
+    <tr class="text-center">
+      <!-- Columnas dinámicas (explícitas) -->
+      <th *ngFor="let col of columnasDinamicasVisibles" [pSortableColumn]="col.sortable ? col.field : undefined">
+        <div class="d-flex gap-1 align-items-center justify-content-center">
+          {{ col.header }}
+          <p-sortIcon *ngIf="col.sortable" [field]="col.field">
+            <ng-template pTemplate="default" let-sortOrder>
+              <i *ngIf="sortOrder === 1" class="pi pi-sort-up sort-icon"></i>
+              <i *ngIf="sortOrder === -1" class="pi pi-sort-down sort-icon"></i>
+              <i *ngIf="sortOrder === 0 || sortOrder == null" class="pi pi-sort sort-icon"></i>
+            </ng-template>
+          </p-sortIcon>
         </div>
-
-        <!-- Filtro por nombre -->
-        <div class="col-12 md:col-6 lg:col-2">
-          <label for="filtroNombre" class="block text-sm font-medium mb-2">Nombre</label>
-          <input
-            pInputText
-            id="filtroNombre"
-            name="filtroNombre"
+      </th>
+    </tr>
+    <!-- Fila de filtros dinámicos -->
+    <tr class="filtro" [ngClass]="{'d-none': !filtrosVisibles}">
+      <th *ngFor="let col of columnasDinamicasVisibles">
+        <div class="w-100 p-1" *ngIf="col.filtrable">
+          <!-- Input nombre -->
+          <input *ngIf="col.field === 'nombre'" type="text" pInputText pSize="small" class="w-100 filtro-columna-input"
             [(ngModel)]="filtroNombre"
-            (input)="aplicarFiltrosLocales()"
-            placeholder="Filtrar por nombre"
-            class="w-full">
-        </div>
+            (input)="dt1.filter($any($event.target).value, 'nombre', 'contains'); onTableFilter()"
+            placeholder="Filtrar Nombre" />
 
-        <!-- Filtro por descripción -->
-        <div class="col-12 md:col-6 lg:col-2">
-          <label for="filtroDescripcion" class="block text-sm font-medium mb-2">Descripción</label>
-          <input
-            pInputText
-            id="filtroDescripcion"
-            name="filtroDescripcion"
+          <!-- Input descripción -->
+          <input *ngIf="col.field === 'descripcion'" type="text" pInputText pSize="small" class="w-100 filtro-columna-input"
             [(ngModel)]="filtroDescripcion"
-            (input)="aplicarFiltrosLocales()"
-            placeholder="Filtrar por descripción"
-            class="w-full">
-        </div>
+            (input)="dt1.filter($any($event.target).value, 'descripcion', 'contains'); onTableFilter()"
+            placeholder="Filtrar Descripción" />
 
-        <!-- Filtro por precio -->
-        <div class="col-12 md:col-6 lg:col-2">
-          <label for="filtroPrecio" class="block text-sm font-medium mb-2">Precio</label>
-          <input
-            pInputText
-            id="filtroPrecio"
-            name="filtroPrecio"
-            [(ngModel)]="filtroPrecio"
-            (input)="aplicarFiltrosLocales()"
-            placeholder="Filtrar por precio"
-            class="w-full">
-        </div>
+          <!-- Input precio -->
+          <input *ngIf="col.field === 'precio'" type="text" pInputText pSize="small"
+            class="w-100 filtro-columna-input" [(ngModel)]="filtroPrecio"
+            (input)="dt1.filter($any($event.target).value, 'precio', 'contains'); onTableFilter()"
+            placeholder="Filtrar Precio" />
 
-        <!-- Filtro por estado -->
-        <div class="col-12 md:col-6 lg:col-2">
-          <label for="filtroActivo" class="block text-sm font-medium mb-2">Estado</label>
-          <p-dropdown
-            id="filtroActivo"
-            name="filtroActivo"
+          <!-- Input unidad -->
+          <input *ngIf="col.field === 'unidad'" type="text" pInputText pSize="small" class="w-100 filtro-columna-input"
+            [(ngModel)]="filtroUnidad"
+            (input)="dt1.filter($any($event.target).value, 'unidad', 'contains'); onTableFilter()"
+            placeholder="Filtrar Unidad" />
+
+          <!-- Dropdown estado -->
+          <p-dropdown *ngIf="col.field === 'activo'"
             [(ngModel)]="filtroActivo"
-            (onChange)="aplicarFiltrosLocales()"
-            [options]="[
-              {label: 'Todos', value: null},
-              {label: 'Activo', value: true},
-              {label: 'Inactivo', value: false}
-            ]"
+            (onChange)="dt1.filter(filtroActivo, 'activo', 'equals'); onTableFilter()"
+            [options]="estadoOptions"
             optionLabel="label"
             optionValue="value"
-            placeholder="Filtrar por estado"
-            class="w-full">
+            placeholder="Estado"
+            [showClear]="true"
+            styleClass="w-100">
           </p-dropdown>
         </div>
-      </div>
+      </th>
+    </tr>
+  </ng-template>
 
-      <!-- Botones de acción -->
-      <div class="flex justify-content-end mt-3">
-        <p-button
-          label="Limpiar Filtros"
-          icon="pi pi-times"
-          severity="secondary"
-          (onClick)="limpiarFiltros()"
-          class="p-button-sm">
-        </p-button>
-      </div>
-    </ng-template>
-  </p-card>
+  <!-- Cuerpo dinámico -->
+  <ng-template pTemplate="body" let-servicio let-rowIndex="rowIndex">
+    <tr (click)="verDetalle(servicio)" style="cursor: pointer;" pTooltip="Click para ver detalles">
+      <td *ngFor="let col of columnasDinamicas" class="cell-center" [ngClass]="{'d-none': col.field === 'acciones'}">
+        <span *ngIf="col.field === 'id'" class="font-medium">{{ servicio.id }}</span>
+        <span *ngIf="col.field === 'nombre'" class="font-medium text-primary">{{ servicio.nombre }}</span>
+        <span *ngIf="col.field === 'descripcion'" [title]="servicio.descripcion">
+          {{ servicio.descripcion?.length > 30 ? (servicio.descripcion | slice:0:30) + '...' : servicio.descripcion }}
+        </span>
+        <span *ngIf="col.field === 'precio'" class="text-primary font-semibold">
+          {{ servicio.precio | currency:'USD':'symbol':'1.2-2' }}
+        </span>
+        <span *ngIf="col.field === 'unidad'">{{ servicio.unidad }}</span>
+        <span *ngIf="col.field === 'activo'">
+          <p-tag [value]="servicio.activo ? 'Activo' : 'Inactivo'"
+                 [severity]="servicio.activo ? 'success' : 'danger'">
+          </p-tag>
+        </span>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td [attr.colspan]="columnasDinamicasVisibles.length" class="text-center p-4">
+        <div class="empty-state">
+          <i class="pi pi-cog text-4xl text-gray-400 mb-3"></i>
+          <p class="text-gray-600">No se encontraron servicios</p>
+          <p-button label="Crear Primer Servicio" icon="pi pi-plus" severity="success" size="small"
+            (onClick)="nuevoServicio()">
+          </p-button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
 
-  <!-- Tabla de servicios -->
-  <p-card>
-    <ng-template pTemplate="content">
-      <p-table
-        [value]="serviciosFiltrados"
-        [loading]="loading"
-        [paginator]="true"
-        [rows]="10"
-        [rowsPerPageOptions]="[5, 10, 20, 50]"
-        [showCurrentPageReport]="true"
-        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} servicios"
-        [globalFilterFields]="['nombre', 'descripcion', 'precio', 'unidad']"
-        responsiveLayout="scroll"
-        styleClass="p-datatable-striped">
-
-        <ng-template pTemplate="caption">
-          <div class="flex justify-content-between align-items-center">
-            <span class="text-lg font-semibold">Total: {{serviciosFiltrados.length}} servicios</span>
-          </div>
-        </ng-template>
-
-        <ng-template pTemplate="header">
-          <tr>
-            <th pSortableColumn="id" style="width: 80px">
-              ID <p-sortIcon field="id"></p-sortIcon>
-            </th>
-            <th pSortableColumn="nombre" style="min-width: 250px">
-              Nombre <p-sortIcon field="nombre"></p-sortIcon>
-            </th>
-            <th style="min-width: 300px">Descripción</th>
-            <th pSortableColumn="precio" style="min-width: 120px">
-              Precio <p-sortIcon field="precio"></p-sortIcon>
-            </th>
-            <th pSortableColumn="unidad" style="min-width: 100px">
-              Unidad <p-sortIcon field="unidad"></p-sortIcon>
-            </th>
-            <th pSortableColumn="activo" style="min-width: 100px">
-              Estado <p-sortIcon field="activo"></p-sortIcon>
-            </th>
-            <th style="width: 120px">Acciones</th>
-          </tr>
-        </ng-template>
-
-        <ng-template pTemplate="body" let-servicio>
-          <tr>
-            <td>{{servicio.id}}</td>
-            <td>
-              <span class="font-medium">{{servicio.nombre}}</span>
-            </td>
-            <td>
-              <span [title]="servicio.descripcion">
-                {{servicio.descripcion.length > 80 ? (servicio.descripcion | slice:0:80) + '...' : servicio.descripcion}}
-              </span>
-            </td>
-            <td>
-              <span class="font-semibold text-primary">{{formatearPrecio(servicio.precio)}}</span>
-            </td>
-            <td>
-              <p-tag
-                [value]="servicio.unidad"
-                severity="info">
-              </p-tag>
-            </td>
-            <td>
-              <p-tag
-                [value]="getEstadoTexto(servicio.activo)"
-                [severity]="getEstadoSeverity(servicio.activo)">
-              </p-tag>
-            </td>
-            <td>
-              <div class="flex gap-2">
-                <p-button
-                  icon="pi pi-eye"
-                  severity="info"
-                  size="small"
-                  [text]="true"
-                  pTooltip="Ver detalles">
-                </p-button>
-                <p-button
-                  icon="pi pi-pencil"
-                  severity="warn"
-                  size="small"
-                  [text]="true"
-                  pTooltip="Editar">
-                </p-button>
-                <p-button
-                  icon="pi pi-trash"
-                  severity="danger"
-                  size="small"
-                  [text]="true"
-                  pTooltip="Eliminar">
-                </p-button>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="7" class="text-center p-4">
-              <div class="flex flex-column align-items-center">
-                <i class="pi pi-cog text-4xl text-300 mb-3"></i>
-                <span class="text-lg text-500">No se encontraron servicios</span>
-                <span class="text-sm text-400">Intenta ajustar los filtros o agregar nuevos servicios</span>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </ng-template>
-  </p-card>
-</div>
-
-<!-- Toast para mensajes -->
-<p-toast position="top-right"></p-toast>

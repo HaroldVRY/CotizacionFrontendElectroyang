@@ -8,9 +8,7 @@ import {
   ItemCotizacion,
   CreateCotizacionRequest,
   ApiResponse,
-  PaginatedResponse,
-  Cliente,
-  Servicio
+  PaginatedResponse
 } from '../modules/cotizar/interface/cotizacion.interface';@Injectable({
   providedIn: 'root'
 })
@@ -165,74 +163,7 @@ export class CotizacionService {
           throw error;
         })
       );
-  }  // ===== CLIENTES =====
-
-  /**
-   * Obtener todos los clientes
-   */
-  getClientes(): Observable<ApiResponse<Cliente[]>> {
-    return this.http.get<ApiResponse<Cliente[]>>(`${this.API_URL}/clientes`)
-      .pipe(
-        catchError(error => {
-          this.setError('Error al cargar los clientes');
-          throw error;
-        })
-      );
-  }
-
-  // ===== SERVICIOS =====
-
-  /**
-   * Obtener todos los servicios
-   */
-  getServicios(): Observable<ApiResponse<Servicio[]>> {
-    return this.http.get<ApiResponse<Servicio[]>>(`${this.API_URL}/servicios`)
-      .pipe(
-        catchError(error => {
-          this.setError('Error al cargar los servicios');
-          throw error;
-        })
-      );
-  }
-
-  /**
-   * Buscar servicios por término
-   */
-  buscarServicios(termino: string): Observable<ApiResponse<Servicio[]>> {
-    return this.http.get<ApiResponse<Servicio[]>>(`${this.API_URL}/servicios/search?term=${termino}`)
-      .pipe(
-        catchError(error => {
-          this.setError('Error al buscar servicios');
-          throw error;
-        })
-      );
-  }
-
-  /**
-   * Buscar servicios por descripción (búsqueda avanzada)
-   */
-  buscarServiciosPorDescripcion(descripcion: string): Observable<ApiResponse<Servicio[]>> {
-    return this.http.get<ApiResponse<Servicio[]>>(`${this.API_URL}/servicios/search/advanced?descripcion=${encodeURIComponent(descripcion)}`)
-      .pipe(
-        catchError(error => {
-          this.setError('Error al buscar servicios por descripción');
-          throw error;
-        })
-      );
-  }
-
-  /**
-   * Obtener servicio por ID
-   */
-  getServicioPorId(id: number): Observable<ApiResponse<Servicio>> {
-    return this.http.get<ApiResponse<Servicio>>(`${this.API_URL}/servicios/${id}`)
-      .pipe(
-        catchError(error => {
-          this.setError('Error al obtener el servicio');
-          throw error;
-        })
-      );
-  }
+  }  // Métodos de clientes y servicios movidos a sus respectivos servicios
 
   /**
    * Actualizar cotización (método adicional para items)
@@ -255,31 +186,7 @@ export class CotizacionService {
       );
   }
 
-  // ===== REPORTES =====
-
-  /**
-   * Generar reporte PDF
-   */
-  generarReporte(id: string | number): Observable<Blob> {
-    this.setLoading(true);
-
-    // Usar el endpoint correcto para la generación de reportes
-    const REPORTS_URL = environment.reportsUrl;
-
-    return this.http.get(`${REPORTS_URL}/generate-pdf/${id}`, { responseType: 'blob' })
-      .pipe(
-        map(response => {
-          this.setLoading(false);
-          this.clearError();
-          return response;
-        }),
-        catchError(error => {
-          this.setLoading(false);
-          this.setError('Error al generar el reporte');
-          throw error;
-        })
-      );
-  }  // ===== UTILIDADES =====
+  // Métodos de reportes movidos al ReporteService  // ===== UTILIDADES =====
 
   /**
    * Procesar cotización para vista de lista

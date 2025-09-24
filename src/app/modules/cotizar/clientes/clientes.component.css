@@ -1,0 +1,40 @@
+/* Estilos para el componente de clientes */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.empty-state i {
+  margin-bottom: 1rem;
+}
+
+.filtro-columna-input {
+  font-size: 0.875rem;
+}
+
+.cell-center {
+  text-align: center;
+}
+
+.sort-icon {
+  color: var(--p-primary-color, #007ad9);
+  font-size: 0.875rem;
+}
+
+/* Estilos para filas clickeable */
+tr[style*="cursor: pointer"]:hover {
+  background-color: rgba(74, 122, 255, 0.04) !important;
+}
+
+.no-underline {
+  text-decoration: none;
+}
+
+.no-underline:hover {
+  text-decoration: underline;
+}

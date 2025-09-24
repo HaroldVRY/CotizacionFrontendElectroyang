@@ -1,7 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
-import { environment } from '../../../../environments/environment';
+import { Subject } from 'rxjs';
+import { takeUntil, finalize } from 'rxjs/operators';
+import { ClienteService } from '../../../service/cliente.service';
+import { RequestHandlerService } from '../../../shared/services/request-handler.service';
 import { Cliente } from '../interface/cotizacion.interface';
 
 @Component({
@@ -10,22 +12,47 @@ import { Cliente } from '../interface/cotizacion.interface';
   templateUrl: './clientes.component.html',
   styleUrl: './clientes.component.css'
 })
-export class ClientesComponent implements OnInit {
+export class ClientesComponent implements OnInit, OnDestroy {
   clientes: Cliente[] = [];
   clientesFiltrados: Cliente[] = [];
   loading = false;
   busquedaGlobal = '';
+  rows = 10;
+
+  // Control de filtros
+  filtrosVisibles = false;
 
   // Campos para filtros específicos
   filtroNombre = '';
   filtroRuc = '';
   filtroEmail = '';
   filtroContacto = '';
+  filtroTelefono = '';
+  filtroDireccion = '';
 
-  private readonly API_URL = environment.apiUrl || 'http://localhost:3000/api';
+  // Columnas de la tabla
+  columnasDinamicas = [
+    { field: 'id', header: 'ID', sortable: true, filtrable: false, tipo: 'numero' },
+    { field: 'nombre', header: 'Nombre', sortable: true, filtrable: true, tipo: 'texto' },
+    { field: 'ruc', header: 'RUC', sortable: true, filtrable: true, tipo: 'texto' },
+    { field: 'email', header: 'Email', sortable: true, filtrable: true, tipo: 'texto' },
+    { field: 'contacto', header: 'Contacto', sortable: true, filtrable: true, tipo: 'texto' },
+    { field: 'telefono', header: 'Teléfono', sortable: false, filtrable: true, tipo: 'texto' },
+    { field: 'direccion', header: 'Dirección', sortable: false, filtrable: true, tipo: 'texto' },
+    { field: 'created_at', header: 'Fecha Creación', sortable: true, filtrable: false, tipo: 'fecha' },
+    { field: 'acciones', header: 'Acciones', sortable: false, filtrable: false, tipo: 'acciones' }
+  ];
+
+  // Columnas visibles (sin acciones)
+  get columnasDinamicasVisibles() {
+    return this.columnasDinamicas.filter(col => col.field !== 'acciones');
+  }
+
+  private destroy$ = new Subject<void>();
 
   constructor(
-    private http: HttpClient,
+    private clienteService: ClienteService,
+    private requestHandler: RequestHandlerService,
     private messageService: MessageService
   ) { }
 
@@ -33,33 +60,31 @@ export class ClientesComponent implements OnInit {
     this.cargarClientes();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   cargarClientes(): void {
     this.loading = true;
-    const url = `${this.API_URL}/clientes`;
 
-    this.http.get<{ success: boolean, data: Cliente[] }>(url).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.clientes = response.data;
-          this.clientesFiltrados = [...this.clientes];
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Éxito',
-            detail: `Se cargaron ${this.clientes.length} clientes`
-          });
+    this.requestHandler.handle(this.clienteService.getClientes())
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.loading = false)
+      )
+      .subscribe({
+        next: (response: any) => {
+          if (response.success) {
+            this.clientes = response.data;
+            this.clientesFiltrados = [...this.clientes];
+            this.requestHandler.showSuccess(`Se cargaron ${this.clientes.length} clientes`);
+          }
+        },
+        error: (error: any) => {
+          console.error('Error al cargar clientes:', error);
         }
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error al cargar clientes:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Error al cargar la lista de clientes'
-        });
-        this.loading = false;
-      }
-    });
+      });
   }
 
   onBusquedaGlobal(): void {
@@ -73,6 +98,7 @@ export class ClientesComponent implements OnInit {
         cliente.ruc.toLowerCase().includes(this.busquedaGlobal.toLowerCase()) ||
         cliente.email.toLowerCase().includes(this.busquedaGlobal.toLowerCase()) ||
         cliente.contacto.toLowerCase().includes(this.busquedaGlobal.toLowerCase()) ||
+        cliente.telefono.toLowerCase().includes(this.busquedaGlobal.toLowerCase()) ||
         cliente.direccion.toLowerCase().includes(this.busquedaGlobal.toLowerCase());
 
       const filtroNombreMatch = this.filtroNombre === '' ||
@@ -87,8 +113,89 @@ export class ClientesComponent implements OnInit {
       const filtroContactoMatch = this.filtroContacto === '' ||
         cliente.contacto.toLowerCase().includes(this.filtroContacto.toLowerCase());
 
+      const filtroTelefonoMatch = this.filtroTelefono === '' ||
+        cliente.telefono.toLowerCase().includes(this.filtroTelefono.toLowerCase());
+
+      const filtroDireccionMatch = this.filtroDireccion === '' ||
+        cliente.direccion.toLowerCase().includes(this.filtroDireccion.toLowerCase());
+
       return busquedaGlobalMatch && filtroNombreMatch && filtroRucMatch &&
-        filtroEmailMatch && filtroContactoMatch;
+        filtroEmailMatch && filtroContactoMatch && filtroTelefonoMatch && filtroDireccionMatch;
+    });
+  }
+
+  /**
+   * Alternar visibilidad de filtros por columna
+   */
+  toggleFiltros(): void {
+    this.filtrosVisibles = !this.filtrosVisibles;
+    if (!this.filtrosVisibles) {
+      this.limpiarFiltrosColumna();
+    }
+  }
+
+  /**
+   * Limpiar todos los filtros (búsqueda global y por columna)
+   */
+  clear(table: any, searchInput: any): void {
+    // Limpiar búsqueda global
+    this.busquedaGlobal = '';
+    if (searchInput) {
+      searchInput.value = '';
+    }
+
+    // Limpiar filtros por columna
+    this.limpiarFiltrosColumna();
+
+    // Limpiar tabla usando PrimeNG
+    if (table) {
+      table.clear();
+    }
+
+    // Aplicar filtros limpios
+    this.aplicarFiltrosLocales();
+  }
+
+  /**
+   * Limpiar filtros por columna
+   */
+  private limpiarFiltrosColumna(): void {
+    this.filtroNombre = '';
+    this.filtroRuc = '';
+    this.filtroEmail = '';
+    this.filtroContacto = '';
+    this.filtroTelefono = '';
+    this.filtroDireccion = '';
+  }
+
+  /**
+   * Manejar eventos de filtrado de la tabla (para compatibilidad)
+   */
+  onTableFilter(): void {
+    // Método requerido por el template para eventos de filtrado
+  }
+
+  /**
+   * Crear nuevo cliente
+   */
+  nuevoCliente(): void {
+    // TODO: Implementar navegación a formulario de creación de cliente
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Función pendiente',
+      detail: 'La funcionalidad de crear cliente será implementada próximamente'
+    });
+  }
+
+  /**
+   * Ver detalle de cliente
+   */
+  verDetalle(cliente: Cliente): void {
+    // TODO: Implementar navegación a detalle del cliente
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Ver Cliente',
+      detail: `Mostrando detalles de: ${cliente.nombre}`
     });
   }
 
@@ -98,6 +205,8 @@ export class ClientesComponent implements OnInit {
     this.filtroRuc = '';
     this.filtroEmail = '';
     this.filtroContacto = '';
+    this.filtroTelefono = '';
+    this.filtroDireccion = '';
     this.clientesFiltrados = [...this.clientes];
   }
 

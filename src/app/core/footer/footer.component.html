@@ -1,11 +1,19 @@
+<!--
+  FOOTER COMPLEJO COMENTADO - Para usar en proyectos futuros
+
+  Este footer incluye:
+  - Estructura de 6 columnas responsive
+  - Información de empresa
+  - Lista de servicios
+  - Información de contacto
+  - Palabras clave SEO con etiquetas
+  - Texto de derechos reservados
+
 <div class="footer">
   <br>
-  <!-- Estructura de 6 columnas -->
   <div class="grid md:grid-cols-6 gap-8 px-4 py-8">
-    <!-- Columna vacía (1) -->
     <div></div>
 
-    <!-- Columna 1: Información de la empresa -->
     <div class="space-y-4">
       <h3 class="text-base font-bold text-blue-300">ELECTROYANG E.I.R.L.</h3>
       <p class="text-sm text-gray-400">
@@ -13,7 +21,6 @@
       </p>
     </div>
 
-    <!-- Columna 2: Servicios -->
     <div class="space-y-4">
       <h4 class="text-sm font-semibold">Servicios</h4>
       <ul class="space-y-2 text-sm text-gray-400">
@@ -24,42 +31,32 @@
       </ul>
     </div>
 
-    <!-- Columna 3: Contacto -->
     <div class="space-y-4">
       <h4 class="text-sm font-semibold">Contacto</h4>
       <ul class="space-y-2 text-sm text-gray-400">
         <li>+51 1 234-5678</li>
-        <li>contactoelectroyang.com.pe</li>
+        <li>contacto@electroyang.com.pe</li>
         <li>Av. Industrial 123, Lima</li>
         <li>Emergencias 24/7</li>
       </ul>
     </div>
 
-    <!-- Columna 4: Palabras Clave SEO -->
     <div class="space-y-4">
-  <h4 class="text-sm font-semibold ">Palabras Clave SEO</h4>
-  <div class="flex flex-wrap ">
-    <span class="text-sm bg-blue-800 text-xs px-2 py-1 rounded">bobinado motores</span>
+      <h4 class="text-sm font-semibold ">Palabras Clave SEO</h4>
+      <div class="flex flex-wrap ">
+        <span class="text-sm bg-blue-800 text-xs px-2 py-1 rounded">bobinado motores</span>
+        <span class="text-sm bg-blue-800 text-xs px-2 py-1 rounded">alta tensión</span>
+        <span class="text-sm bg-blue-800 text-xs px-2 py-1 rounded">tercerización</span>
+        <span class="text-sm bg-blue-800 text-xs px-2 py-1 rounded">mantenimiento eléctrico</span>
+      </div>
+    </div>
 
-    <span class="text-sm bg-blue-800 text-xs px-2 py-1 rounded">alta tensión</span>
-
-    <span class="text-sm bg-blue-800 text-xs px-2 py-1 rounded">tercerización</span>
-
-    <span class="text-sm bg-blue-800 text-xs px-2 py-1 rounded">mantenimiento eléctrico</span>
-  </div>
-</div>
-
-
-    <!-- Columna vacía (6) -->
     <div></div>
   </div>
 
-  <!-- Separador con texto de derechos reservados -->
   <div class="grid md:grid-cols-6 gap-8 px-4 py-8">
-    <!-- Columna vacía (1) -->
     <div></div>
 
-    <!-- Columna que abarca las 4 columnas centrales -->
     <div class="footer-separator">
       <p class="text-sm text-gray-400">
         © {{ anio }} ELECTROYANG E.I.R.L. Todos los derechos reservados.
@@ -68,7 +65,12 @@
       </p>
     </div>
 
-    <!-- Columna vacía (6) -->
     <div></div>
   </div>
+</div>
+-->
+
+<!-- FOOTER SIMPLE - Siempre visible al final de la pantalla -->
+<div class="simple-footer">
+  <p>© {{ anio }} ELECTROYANG E.I.R.L. - Todos los derechos reservados</p>
 </div>

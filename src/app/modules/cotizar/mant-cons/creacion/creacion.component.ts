@@ -5,7 +5,10 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { CotizacionService } from '../../../../service/cotizacion.service';
-import {Cotizacion,ItemCotizacion,Cliente,Servicio,CreateCotizacionRequest,ApiResponse} from '../../../../modules/cotizar/interface/cotizacion.interface';
+import { ClienteService } from '../../../../service/cliente.service';
+import { ServicioService } from '../../../../service/servicio.service';
+import { ReporteService } from '../../../../service/reporte.service';
+import {Cotizacion,ItemCotizacion,Cliente,Servicio,CreateCotizacionRequest,DetalleItem,ApiResponse} from '../../../../modules/cotizar/interface/cotizacion.interface';
 
 
 @Component({
@@ -73,6 +76,9 @@ export class CreacionComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     public cotizacionService: CotizacionService,
+    private clienteService: ClienteService,
+    private servicioService: ServicioService,
+    private reporteService: ReporteService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private cdr: ChangeDetectorRef
@@ -136,8 +142,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Agregar primer item
-    this.agregarItem();
+    // No agregar item inicial - se agregará mediante el modal
   }
 
   /**
@@ -184,16 +189,16 @@ export class CreacionComponent implements OnInit, OnDestroy {
    */
   private loadInitialData(): void {
     // Cargar clientes
-    this.cotizacionService.getClientes()
+    this.clienteService.getClientes()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response) => {
+        next: (response: any) => {
           this.clientes = response.data || [];
           this.clientesSugeridos = this.clientes; // Inicializar sugerencias
           console.log('📊 Clientes cargados:', this.clientes.length);
           console.log('🔍 Primeros clientes:', this.clientes.slice(0, 3).map(c => c.nombre));
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error al cargar clientes:', error);
           this.messageService.add({
             severity: 'warn',
@@ -204,13 +209,13 @@ export class CreacionComponent implements OnInit, OnDestroy {
       });
 
     // Cargar servicios
-    this.cotizacionService.getServicios()
+    this.servicioService.getServicios()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response) => {
+        next: (response: any) => {
           this.servicios = response.data || [];
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error al cargar servicios:', error);
           this.messageService.add({
             severity: 'warn',
@@ -306,10 +311,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
       this.agregarItem(itemFormulario as ItemCotizacion);
     });
 
-    // Si no hay items, agregar uno vacío
-    if (itemsACargar.length === 0) {
-      this.agregarItem();
-    }
+    // No agregar item vacío - solo cargar los items existentes
 
     // Deshabilitar formulario si es modo ver
     if (this.modo === 'ver') {
@@ -331,6 +333,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
   private createItemFormGroup(item?: ItemCotizacion): FormGroup {
     return this.fb.group({
       numeroItem: [item?.numeroItem || this.itemsFormArray.length + 1],
+      servicioId: [item?.servicioId || null],
       cantidad: [item?.cantidad || 1, [Validators.required, Validators.min(1)]],
       descripcion: [item?.descripcion || '', Validators.required],
       precioUnitario: [item?.precioUnitario || 0, [Validators.required, Validators.min(0)]]
@@ -349,16 +352,8 @@ export class CreacionComponent implements OnInit, OnDestroy {
    * Eliminar item del formulario (método para el modo formulario)
    */
   eliminarItemFormulario(index: number): void {
-    if (this.itemsFormArray.length > 1) {
-      this.itemsFormArray.removeAt(index);
-      this.actualizarNumerosItems();
-    } else {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Advertencia',
-        detail: 'Debe mantener al menos un item'
-      });
-    }
+    this.itemsFormArray.removeAt(index);
+    this.actualizarNumerosItems();
   }
 
   /**
@@ -444,38 +439,132 @@ export class CreacionComponent implements OnInit, OnDestroy {
     return this.cotizacionService.formatearPrecio(this.totalGeneral);
   }
 
+  /**
+   * Obtener items para mostrar en la tabla - FormArray en modo crear/editar, cotizacion.items en modo ver
+   */
+  get itemsParaTabla(): any[] {
+    if (this.modo === 'crear' || this.modo === 'duplicar' || (this.modo === 'editar' && this.itemsFormArray.length > 0)) {
+      // En modo crear, duplicar o editar con FormArray, usar el FormArray
+      return this.itemsFormArray.controls.map((control, index) => {
+        const item = control.value;
+        return {
+          numeroItem: item.numeroItem || (index + 1),
+          cantidad: item.cantidad || 0,
+          descripcion: item.descripcion || '',
+          precioUnitario: item.precioUnitario || 0,
+          total: (item.cantidad || 0) * (item.precioUnitario || 0)
+        };
+      });
+    } else if (this.cotizacion) {
+      // En modo ver o cuando se carga una cotización existente, usar los datos cargados
+      return this.cotizacion.items || this.cotizacion.detalles || [];
+    }
+    return [];
+  }
+
+  /**
+   * Obtener subtotal dinámico para mostrar en pantalla
+   */
+  get subtotalParaMostrar(): number {
+    if (this.modo === 'crear' || this.modo === 'duplicar' || (this.modo === 'editar' && this.itemsFormArray.length > 0)) {
+      return this.subtotal; // Usa el subtotal calculado del FormArray
+    }
+    const cotizacionSubtotal = this.cotizacion?.subtotal;
+    return typeof cotizacionSubtotal === 'number' ? cotizacionSubtotal : parseFloat(cotizacionSubtotal as string) || 0;
+  }
+
+  /**
+   * Obtener IGV dinámico para mostrar en pantalla
+   */
+  get igvParaMostrar(): number {
+    if (this.modo === 'crear' || this.modo === 'duplicar' || (this.modo === 'editar' && this.itemsFormArray.length > 0)) {
+      return this.igv; // Usa el IGV calculado del FormArray
+    }
+    const cotizacionIgv = this.cotizacion?.igv;
+    return typeof cotizacionIgv === 'number' ? cotizacionIgv : parseFloat(cotizacionIgv as string) || 0;
+  }
+
+  /**
+   * Obtener total general dinámico para mostrar en pantalla
+   */
+  get totalGeneralParaMostrar(): number {
+    if (this.modo === 'crear' || this.modo === 'duplicar' || (this.modo === 'editar' && this.itemsFormArray.length > 0)) {
+      return this.totalGeneral; // Usa el total calculado del FormArray
+    }
+    return this.cotizacion?.precioTotal || 0;
+  }
+
+  /**
+   * Obtener total general formateado dinámico para mostrar en pantalla
+   */
+  get totalGeneralFormateadoParaMostrar(): string {
+    if (this.modo === 'crear' || this.modo === 'duplicar' || (this.modo === 'editar' && this.itemsFormArray.length > 0)) {
+      return this.cotizacionService.formatearPrecio(this.totalGeneralParaMostrar);
+    }
+    return this.cotizacion?.precioTotalFormatted || 'S/ 0.00';
+  }
+
   // ===== ACCIONES =====
 
   /**
    * Guardar cotización
    */
   guardarCotizacion(): void {
+    // Marcar todos los controles como tocados para mostrar errores
+    this.cotizacionForm.markAllAsTouched();
+    this.itemsFormArray.controls.forEach(control => control.markAllAsTouched());
+
+    // Validaciones básicas
     if (this.cotizacionForm.invalid) {
-      this.markFormGroupTouched();
       this.messageService.add({
         severity: 'warn',
         summary: 'Formulario Incompleto',
-        detail: 'Por favor complete todos los campos requeridos'
+        detail: 'Por favor complete todos los campos requeridos.'
+      });
+      return;
+    }
+
+    if (this.itemsFormArray.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Items Requeridos',
+        detail: 'Debe agregar al menos un item a la cotización'
+      });
+      return;
+    }
+
+    const formValue = this.cotizacionForm.value;
+    const clienteId = this.obtenerClienteId(formValue.cliente);
+
+    if (!clienteId) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Cliente Requerido',
+        detail: 'Debe seleccionar un cliente válido.'
       });
       return;
     }
 
     this.saving = true;
-    const formValue = this.cotizacionForm.value;
 
+    // Crear request según estructura esperada por la API
     const request: CreateCotizacionRequest = {
-      cliente: formValue.cliente,
-      receptor: formValue.receptor,
-      items: formValue.items,
-      observaciones: formValue.observaciones,
-      tiempoEntrega: formValue.tiempoEntrega,
-      formaPago: formValue.formaPago,
-      banco: formValue.mostrarDatosBancarios ? formValue.banco : undefined,
-      mostrarDatosBancarios: formValue.mostrarDatosBancarios
+      clienteId: clienteId,
+      receptor: formValue.receptor?.trim() || '',
+      observaciones: formValue.observaciones?.trim() || '',
+      tiempoEntrega: formValue.tiempoEntrega?.trim() || '',
+      formaPago: formValue.formaPago?.trim() || '',
+      detalles: this.itemsFormArray.value.map((item: any, index: number) => ({
+        servicioId: item.servicioId || null,
+        numeroItem: index + 1,
+        cantidad: Number(item.cantidad) || 1,
+        descripcion: item.descripcion || '',
+        precioUnitario: Number(item.precioUnitario) || 0
+      }))
     };
 
     const action$ = this.modo === 'editar' && this.cotizacionId
-      ? this.cotizacionService.updateCotizacion(this.cotizacionId, request)
+      ? this.cotizacionService.updateCotizacion(this.cotizacionId, request as any)
       : this.cotizacionService.createCotizacion(request);
 
     action$
@@ -492,15 +581,68 @@ export class CreacionComponent implements OnInit, OnDestroy {
             detail: `Cotización ${mensaje} correctamente`
           });
 
-          // Navegar a la lista
           setTimeout(() => {
             this.router.navigate(['/cotizar/mantenimiento-consulta']);
           }, 1500);
         },
         error: (error) => {
-          console.error('Error al guardar cotización:', error);
+          this.mostrarErrorGuardado(error);
         }
       });
+  }
+
+  /**
+   * Obtener el ID del cliente de manera confiable
+   */
+  private obtenerClienteId(cliente: any): number | null {
+    // Si tenemos un cliente seleccionado directamente
+    if (this.clienteSeleccionado?.id) {
+      return this.clienteSeleccionado.id;
+    }
+
+    // Si el cliente es un objeto con id
+    if (cliente && typeof cliente === 'object' && cliente.id) {
+      return cliente.id;
+    }
+
+    // Si el cliente es un string, buscar por nombre
+    if (typeof cliente === 'string') {
+      const clientePorNombre = this.clientes.find(c => c.nombre === cliente);
+      return clientePorNombre?.id || null;
+    }
+
+    // Si es un número directamente
+    if (typeof cliente === 'number') {
+      return cliente;
+    }
+
+    return null;
+  }
+
+  /**
+   * Mostrar mensaje de error al guardar
+   */
+  private mostrarErrorGuardado(error: any): void {
+    let mensajeError = 'Error al guardar la cotización';
+    let detalle = '';
+
+    if (error?.error?.errors && Array.isArray(error.error.errors)) {
+      detalle = error.error.errors.join('\n');
+      mensajeError = 'Errores de validación encontrados:';
+    } else if (error?.error?.message) {
+      detalle = error.error.message;
+    } else if (error?.message) {
+      detalle = error.message;
+    } else {
+      detalle = 'Error desconocido. Verifique los datos e intente nuevamente.';
+    }
+
+    this.messageService.add({
+      severity: 'error',
+      summary: mensajeError,
+      detail: detalle,
+      life: 15000
+    });
   }
 
   /**
@@ -528,7 +670,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
    */
   vistaPrevia(): void {
     if (this.cotizacionId) {
-      this.cotizacionService.generarReporte(this.cotizacionId)
+      this.reporteService.generarReporteCotizacion(this.cotizacionId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (blob: Blob) => {
@@ -536,7 +678,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
             window.open(url, '_blank');
             window.URL.revokeObjectURL(url);
           },
-          error: (error) => {
+          error: (error: any) => {
             console.error('Error al generar vista previa:', error);
           }
         });
@@ -573,6 +715,9 @@ export class CreacionComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Obtener lista de campos inválidos para debug
+   */
   /**
    * Verificar si un campo tiene error
    */
@@ -626,6 +771,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
    */
   inicializarFormularioItem(): void {
     this.agregarItemForm = this.fb.group({
+      servicioId: [null],
       cantidad: [1, [Validators.required, Validators.min(1)]],
       descripcion: ['', Validators.required],
       precioUnitario: [0, [Validators.required, Validators.min(0.01)]]
@@ -641,6 +787,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
     this.mostrarDialogoAgregarItem = true;
     this.servicioSeleccionado = null;
     this.agregarItemForm.reset({
+      servicioId: null,
       cantidad: 1,
       descripcion: '',
       precioUnitario: 0
@@ -660,6 +807,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
 
     // Precargar el formulario con los datos del item
     this.agregarItemForm.reset({
+      servicioId: item.servicioId || null,
       cantidad: item.cantidad || 1,
       descripcion: item.descripcion || '',
       precioUnitario: item.precioUnitario || 0
@@ -699,10 +847,10 @@ export class CreacionComponent implements OnInit, OnDestroy {
     const query = event.query || '';
 
     if (query.length >= 1) {
-      this.cotizacionService.getServicios().subscribe({
-        next: (response) => {
+      this.servicioService.getServicios().subscribe({
+        next: (response: any) => {
           const servicios = response.data || [];
-          this.serviciosSugeridos = servicios.filter(servicio =>
+          this.serviciosSugeridos = servicios.filter((servicio: any) =>
             servicio.descripcion.toLowerCase().includes(query.toLowerCase()) ||
             servicio.nombre.toLowerCase().includes(query.toLowerCase())
           );
@@ -725,6 +873,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
     const servicio: Servicio = event.value || event;
     this.servicioSeleccionado = servicio;
     this.agregarItemForm.patchValue({
+      servicioId: servicio.id,
       descripcion: servicio.descripcion,
       precioUnitario: parseFloat(servicio.precio)
     });
@@ -741,14 +890,12 @@ export class CreacionComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Confirmar editar item
+   * Confirmar editar item - Solo actualiza en el FormArray local, no hace llamadas a la API
    */
   confirmarEditarItem(): void {
-    if (this.agregarItemForm.valid && this.cotizacion && this.itemEditandoIndex >= 0) {
-      this.guardandoItem = true;
-
+    if (this.agregarItemForm.valid && this.itemEditandoIndex >= 0) {
       const itemActualizado: ItemCotizacion = {
-        servicioId: this.servicioSeleccionado?.id || undefined,
+        servicioId: this.agregarItemForm.get('servicioId')?.value || null,
         numeroItem: this.itemEditandoIndex + 1, // Mantener el número original
         cantidad: this.agregarItemForm.get('cantidad')?.value,
         descripcion: this.agregarItemForm.get('descripcion')?.value,
@@ -756,110 +903,60 @@ export class CreacionComponent implements OnInit, OnDestroy {
         total: this.calcularTotalItem()
       };
 
-      // Crear una copia de los detalles y actualizar el item en la posición especificada
-      const detallesActualizados = [...(this.cotizacion.detalles || [])];
-      detallesActualizados[this.itemEditandoIndex] = itemActualizado;
-
-      // Preparar datos para enviar a la API
-      const datosActualizados = {
-        clienteId: this.cotizacion.clienteId,
-        receptor: this.cotizacion.receptor,
-        observaciones: this.cotizacion.observaciones,
-        tiempoEntrega: this.cotizacion.tiempoEntrega,
-        formaPago: this.cotizacion.formaPago,
-        estado: this.cotizacion.estado,
-        detalles: detallesActualizados
-      };
-
-      // Enviar a la API
-      this.cotizacionService.actualizarCotizacion(this.cotizacionId!, datosActualizados).subscribe({
-        next: (response: ApiResponse<Cotizacion>) => {
-          if (response.success) {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Éxito',
-              detail: 'Item actualizado correctamente'
-            });
-            this.cerrarDialogoAgregarItem();
-            // Recargar datos actualizados desde la API
-            this.recargarCotizacion();
-          }
-          this.guardandoItem = false;
-        },
-        error: (error: any) => {
-          console.error('Error al actualizar item:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'No se pudo actualizar el item'
-          });
-          this.guardandoItem = false;
-        }
+      // Actualizar el item en el FormArray
+      const itemFormGroup = this.fb.group({
+        servicioId: [itemActualizado.servicioId],
+        numeroItem: [itemActualizado.numeroItem],
+        cantidad: [itemActualizado.cantidad, Validators.required],
+        descripcion: [itemActualizado.descripcion, Validators.required],
+        precioUnitario: [itemActualizado.precioUnitario, [Validators.required, Validators.min(0)]],
+        total: [itemActualizado.total]
       });
+
+      // Reemplazar el item en la posición especificada
+      this.itemsFormArray.setControl(this.itemEditandoIndex, itemFormGroup);
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Éxito',
+        detail: 'Item actualizado correctamente'
+      });
+
+      this.cerrarDialogoAgregarItem();
+      this.recalcularTotales();
     }
   }
 
   /**
-   * Confirmar agregar item
+   * Confirmar agregar item - Solo agrega al FormArray local, no hace llamadas a la API
    */
   confirmarAgregarItem(): void {
-    if (this.agregarItemForm.valid && this.cotizacion) {
-      this.guardandoItem = true;
-
+    if (this.agregarItemForm.valid) {
       const nuevoItem: ItemCotizacion = {
-        servicioId: this.servicioSeleccionado?.id || undefined,
-        numeroItem: this.getProximoNumeroItem(),
+        servicioId: this.agregarItemForm.get('servicioId')?.value || null,
+        numeroItem: this.itemsFormArray.length + 1,
         cantidad: this.agregarItemForm.get('cantidad')?.value,
         descripcion: this.agregarItemForm.get('descripcion')?.value,
         precioUnitario: this.agregarItemForm.get('precioUnitario')?.value,
         total: this.calcularTotalItem()
       };
 
-      // Crear una copia de los detalles actuales y agregar el nuevo item
-      const detallesActualizados = [...(this.cotizacion.detalles || []), nuevoItem];
+      // Agregar el item al FormArray local
+      this.agregarItem(nuevoItem);
 
-      // Preparar datos para enviar a la API (sin modificar el estado local aún)
-      const datosActualizados = {
-        clienteId: this.cotizacion.clienteId,
-        receptor: this.cotizacion.receptor,
-        observaciones: this.cotizacion.observaciones,
-        tiempoEntrega: this.cotizacion.tiempoEntrega,
-        formaPago: this.cotizacion.formaPago,
-        estado: this.cotizacion.estado,
-        detalles: detallesActualizados
-      };
-
-      // Enviar a la API
-      this.cotizacionService.actualizarCotizacion(this.cotizacionId!, datosActualizados).subscribe({
-        next: (response: ApiResponse<Cotizacion>) => {
-          if (response.success) {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Éxito',
-              detail: 'Item agregado correctamente'
-            });
-            this.cerrarDialogoAgregarItem();
-            // Recargar datos actualizados desde la API
-            this.recargarCotizacion();
-          }
-          this.guardandoItem = false;
-        },
-        error: (error: any) => {
-          console.error('Error al agregar item:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'No se pudo agregar el item'
-          });
-          // No necesitamos revertir cambios locales porque no los hicimos
-          this.guardandoItem = false;
-        }
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Éxito',
+        detail: 'Item agregado correctamente'
       });
+
+      this.cerrarDialogoAgregarItem();
+      this.recalcularTotales();
     }
   }
 
   /**
-   * Eliminar item (sobrescribir el método existente)
+   * Eliminar item - Solo maneja el estado local, no hace llamadas a la API
    */
   eliminarItem(index: number): void {
     if (this.modo === 'ver') return;
@@ -871,53 +968,20 @@ export class CreacionComponent implements OnInit, OnDestroy {
       acceptLabel: 'Sí',
       rejectLabel: 'No',
       accept: () => {
-        if (this.cotizacion && this.cotizacion.detalles) {
-          // Crear una copia del array sin el item eliminado
-          const detallesActualizados = this.cotizacion.detalles.filter((_, i) => i !== index);
+        // Eliminar del FormArray
+        this.itemsFormArray.removeAt(index);
 
-          // Recalcular números de item en la copia
-          detallesActualizados.forEach((item, i) => {
-            item.numeroItem = i + 1;
-          });
+        // Actualizar números de items
+        this.actualizarNumerosItems();
 
-          // Si es una cotización existente, actualizar en la API
-          if (this.cotizacionId) {
-            const datosActualizados = {
-              clienteId: this.cotizacion.clienteId,
-              receptor: this.cotizacion.receptor,
-              observaciones: this.cotizacion.observaciones,
-              tiempoEntrega: this.cotizacion.tiempoEntrega,
-              formaPago: this.cotizacion.formaPago,
-              estado: this.cotizacion.estado,
-              detalles: detallesActualizados
-            };            this.cotizacionService.actualizarCotizacion(this.cotizacionId, datosActualizados).subscribe({
-              next: (response: ApiResponse<Cotizacion>) => {
-                if (response.success) {
-                  this.messageService.add({
-                    severity: 'success',
-                    summary: 'Éxito',
-                    detail: 'Item eliminado correctamente'
-                  });
-                  // Recargar datos actualizados desde la API
-                  this.recargarCotizacion();
-                }
-              },
-              error: (error: any) => {
-                console.error('Error al eliminar item:', error);
-                this.messageService.add({
-                  severity: 'error',
-                  summary: 'Error',
-                  detail: 'No se pudo eliminar el item'
-                });
-                // Recargar datos originales desde la API
-                this.recargarCotizacion();
-              }
-            });
-          } else {
-            // Si es una nueva cotización, solo actualizar localmente
-            this.recalcularTotalesCotizacion();
-          }
-        }
+        // Recalcular totales
+        this.recalcularTotales();
+
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: 'Item eliminado correctamente'
+        });
       }
     });
   }
@@ -932,62 +996,9 @@ export class CreacionComponent implements OnInit, OnDestroy {
     return Math.max(...this.cotizacion.detalles.map(item => item.numeroItem)) + 1;
   }
 
-  /**
-   * Recalcular totales de la cotización
-   */
-  recalcularTotalesCotizacion(): void {
-    if (this.cotizacion?.detalles) {
-      const subtotal = this.cotizacion.detalles.reduce((sum, item) => {
-        return sum + (Number(item.cantidad) * Number(item.precioUnitario));
-      }, 0);
+  // Método recalcularTotalesCotizacion eliminado - ahora usamos recalcularTotales()
 
-      const igv = subtotal * 0.18;
-      const total = subtotal + igv;
-
-      this.cotizacion.subtotal = subtotal;
-      this.cotizacion.igv = igv;
-      this.cotizacion.total = total;
-      this.cotizacion.precioTotalFormatted = this.cotizacionService.formatearPrecio(total);
-    }
-  }
-
-  /**
-   * Recargar cotización desde la API (sin loading overlay)
-   */
-  recargarCotizacion(): void {
-    if (!this.cotizacionId) return;
-
-    this.cotizacionService.getCotizacionById(this.cotizacionId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          if (response.data) {
-            // Actualizar solo los datos, mantener el estado del formulario
-            const cotizacionActualizada = response.data;
-
-            // Actualizar el objeto cotización con los datos frescos
-            this.cotizacion = {
-              ...this.cotizacion,
-              ...cotizacionActualizada,
-              detalles: cotizacionActualizada.detalles || cotizacionActualizada.items || [],
-              items: cotizacionActualizada.detalles || cotizacionActualizada.items || []
-            };
-
-            // Forzar la detección de cambios en Angular
-            this.recalcularTotalesCotizacion();
-            this.cdr.detectChanges();
-          }
-        },
-        error: (error) => {
-          console.error('Error al recargar cotización:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Error al actualizar los datos'
-          });
-        }
-      });
-  }
+  // Método recargarCotizacion eliminado - ya no es necesario
 
   // ===== MÉTODOS PARA TABS =====
 
@@ -1081,4 +1092,112 @@ export class CreacionComponent implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     }
   }
+
+  /**
+   * Editar cotización actual
+   */
+  editarCotizacion(): void {
+    if (this.cotizacionId) {
+      this.router.navigate(['/cotizar/mantenimiento-consulta/creacion'], {
+        queryParams: { id: this.cotizacionId, modo: 'editar' }
+      });
+    }
+  }
+
+  /**
+   * Eliminar cotización actual
+   */
+  eliminarCotizacion(): void {
+    if (!this.cotizacionId || !this.cotizacion) return;
+
+    this.confirmationService.confirm({
+      message: `¿Está seguro de eliminar la cotización ${this.cotizacion.numero}?`,
+      header: 'Confirmar Eliminación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí',
+      rejectLabel: 'Cancelar',
+      accept: () => {
+        this.cotizacionService.deleteCotizacion(this.cotizacionId!)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Éxito',
+                detail: 'Cotización eliminada correctamente'
+              });
+              this.router.navigate(['/cotizar/mantenimiento-consulta']);
+            },
+            error: (error) => {
+              console.error('Error al eliminar cotización:', error);
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Error al eliminar la cotización'
+              });
+            }
+          });
+      }
+    });
+  }
+
+  /**
+   * Generar reporte PDF
+   */
+  generarReporte(): void {
+    if (!this.cotizacionId) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Advertencia',
+        detail: 'No se puede generar el reporte: ID de cotización no válido'
+      });
+      return;
+    }
+
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Generando reporte',
+      detail: 'Por favor espere...'
+    });
+
+    this.reporteService.generarReporteCotizacion(this.cotizacionId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (blob: Blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `cotizacion-${this.cotizacion?.numero || this.cotizacionId}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Reporte generado y descargado correctamente'
+          });
+        },
+        error: (error) => {
+          console.error('Error al generar reporte:', error);
+          let errorMessage = 'Error desconocido al generar el reporte';
+
+          if (error.status === 404) {
+            errorMessage = 'El servicio de reportes no está disponible. Contacte al administrador.';
+          } else if (error.status === 500) {
+            errorMessage = 'Error interno del servidor al generar el reporte';
+          } else if (error.status === 0) {
+            errorMessage = 'No se pudo conectar con el servidor';
+          }
+
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error al generar reporte',
+            detail: errorMessage
+          });
+        }
+      });
+  }
+
 }
