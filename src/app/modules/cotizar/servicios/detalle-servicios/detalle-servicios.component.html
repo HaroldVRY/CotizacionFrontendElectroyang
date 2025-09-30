@@ -1,0 +1,249 @@
+<!-- Toast para mensajes -->
+<p-toast></p-toast>
+
+<!-- Dialog de confirmación -->
+<p-confirmDialog></p-confirmDialog>
+
+<p-toolbar styleClass="custom-toolbar">
+  <ng-template #start></ng-template>
+  <ng-template #center>
+    <h4>{{ pageTitle }} {{ servicio?.nombre || 'Servicio' }}</h4>
+  </ng-template>
+  <ng-template #end>
+    <div class="d-flex gap-2">
+      <!-- Botones para modo no readonly (crear/editar) -->
+      <p-button *ngIf="!isReadOnly" label="Guardar" icon="pi pi-save" severity="success" [loading]="saving"
+        (onClick)="guardarServicio()">
+      </p-button>
+
+      <!-- Botones para modo readonly (ver) -->
+      <p-button *ngIf="isReadOnly && servicioId" label="Editar"
+        icon="pi pi-pencil" severity="info" (onClick)="editarServicio()">
+      </p-button>
+      <p-button *ngIf="isReadOnly && servicioId" label="Eliminar"
+        icon="pi pi-trash" severity="danger" (onClick)="eliminarServicio()">
+      </p-button>
+
+      <p-button label="Cancelar" icon="pi pi-times" severity="secondary" (onClick)="cancelar()">
+      </p-button>
+    </div>
+  </ng-template>
+</p-toolbar>
+
+<!-- Contenido Principal -->
+<div class="main-content-wrapper" *ngIf="servicio || modo === 'crear'">
+  <div class="tab-panel-content">
+    <form [formGroup]="servicioForm">
+      <!-- Detalle del Servicio -->
+      <div class="detail-card">
+        <p-card class="info-fields-card" [style]="{ overflow: 'hidden' }">
+          <ng-template pTemplate="content">
+            <!-- Layout de 2 columnas -->
+            <div class="two-column-layout">
+              <!-- COLUMNA 1: Información General -->
+              <div class="column-1">
+                <!-- Sección: Información General -->
+                <div class="info-section">
+                  <p-card class="info-fields-card" [style]="{ overflow: 'hidden' }">
+                    <ng-template pTemplate="header">
+                      <div class="section-title-header">
+                        <h4><strong>Información General del Servicio</strong></h4>
+                      </div>
+                    </ng-template>
+                    <ng-template pTemplate="content">
+                      <div class="info-fields-section-three-columns">
+                        <!-- COLUMNA 1: Información Básica -->
+                        <div class="info-fields-section-colum">
+                          <p-inputgroup class="md:!w-80">
+                            <p-inputgroup-addon>
+                              <i class="pi pi-cog icon-primary icon-clickable icon-lg"></i>
+                            </p-inputgroup-addon>
+                            <p-iftalabel>
+                              <input type="text" pInputText formControlName="nombre" [readonly]="isReadOnly"
+                                placeholder="Ingrese el nombre del servicio"
+                                pTooltip="{{servicioForm.get('nombre')?.value || 'Nombre del servicio'}}"
+                                tooltipPosition="top" [showDelay]="300" id="nombreServicio" />
+                              <label for="nombreServicio">Nombre</label>
+                            </p-iftalabel>
+                          </p-inputgroup>
+
+                          <p-inputgroup class="md:!w-80">
+                            <p-inputgroup-addon>
+                              <i class="pi pi-tag icon-primary icon-clickable icon-lg"></i>
+                            </p-inputgroup-addon>
+                            <p-iftalabel>
+                              <input type="text" pInputText formControlName="unidad" [readonly]="isReadOnly"
+                                placeholder="Ingrese la unidad de medida"
+                                pTooltip="{{servicioForm.get('unidad')?.value || 'Unidad de medida (ej: m2, hora, unidad)'}}"
+                                tooltipPosition="top" [showDelay]="300" id="unidadServicio" />
+                              <label for="unidadServicio">Unidad</label>
+                            </p-iftalabel>
+                          </p-inputgroup>
+
+                          <p-inputgroup class="md:!w-80">
+                            <p-inputgroup-addon>
+                              <i class="pi pi-dollar icon-primary icon-clickable icon-lg"></i>
+                            </p-inputgroup-addon>
+                            <p-iftalabel>
+                              <p-inputnumber formControlName="precio" [readonly]="isReadOnly" mode="decimal"
+                                [minFractionDigits]="2" [maxFractionDigits]="2" [min]="0"
+                                placeholder="0.00" currency="PEN" locale="es-PE"
+                                pTooltip="{{servicioForm.get('precio')?.value || 'Precio del servicio'}}"
+                                tooltipPosition="top" [showDelay]="300" id="precioServicio">
+                              </p-inputnumber>
+                              <label for="precioServicio">Precio (S/)</label>
+                            </p-iftalabel>
+                          </p-inputgroup>
+                        </div>
+
+                        <!-- COLUMNA 2: Estado y Fechas -->
+                        <div class="info-fields-section-colum">
+                          <div class="field" *ngIf="!isReadOnly || (isReadOnly && modo !== 'crear')">
+                            <p-inputgroup class="md:!w-80">
+                              <p-inputgroup-addon>
+                                <i class="pi pi-check-circle"
+                                   [ngClass]="{
+                                     'text-green-500': servicioForm.get('activo')?.value === true,
+                                     'text-gray-400': servicioForm.get('activo')?.value === false
+                                   }"></i>
+                              </p-inputgroup-addon>
+                              <p-iftalabel>
+                                <p-dropdown formControlName="activo"
+                                           [options]="estadoOptions"
+                                           optionLabel="label"
+                                           optionValue="value"
+                                           [disabled]="modo !== 'editar'"
+                                           placeholder="Seleccione el estado"
+                                           pTooltip="{{servicioForm.get('activo')?.value ? 'Servicio activo y disponible para cotizaciones' : 'Servicio inactivo - no aparecerá en cotizaciones'}}"
+                                           tooltipPosition="top"
+                                           [showDelay]="300"
+                                           id="activoServicio"
+                                           styleClass="w-full">
+                                </p-dropdown>
+                                <label for="activoServicio">Estado</label>
+                              </p-iftalabel>
+                            </p-inputgroup>
+                          </div>
+
+                          <p-inputgroup class="md:!w-80" *ngIf="isReadOnly && servicio?.id">
+                            <p-inputgroup-addon>
+                              <i class="pi pi-hashtag icon-primary icon-clickable icon-lg"></i>
+                            </p-inputgroup-addon>
+                            <p-iftalabel>
+                              <input type="text" pInputText
+                                [value]="servicio?.id || '-'" readonly
+                                pTooltip="{{servicio?.id || '-'}}"
+                                tooltipPosition="top" [showDelay]="300" id="idServicio" />
+                              <label for="idServicio">ID Servicio</label>
+                            </p-iftalabel>
+                          </p-inputgroup>
+                        </div>
+
+                        <!-- COLUMNA 3: Descripción (columna completa) -->
+                        <div class="info-fields-section-colum">
+                          <p-inputgroup class="md:!w-80">
+                            <p-inputgroup-addon>
+                              <i class="pi pi-align-left icon-primary icon-clickable icon-lg"></i>
+                            </p-inputgroup-addon>
+                            <p-iftalabel>
+                              <textarea pInputTextarea formControlName="descripcion" [readonly]="isReadOnly"
+                                rows="6" class="w-full"
+                                placeholder="Ingrese la descripción detallada del servicio"
+                                pTooltip="{{servicioForm.get('descripcion')?.value || 'Descripción del servicio'}}"
+                                tooltipPosition="top" [showDelay]="300" id="descripcionServicio">
+                              </textarea>
+                              <label for="descripcionServicio">Descripción</label>
+                            </p-iftalabel>
+                          </p-inputgroup>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </p-card>
+                </div>
+              </div>
+
+              <!-- COLUMNA 2: Información Adicional -->
+              <div class="column-2">
+                <div class="info-section">
+                  <p-card class="info-fields-card" [style]="{ overflow: 'hidden' }">
+                    <ng-template pTemplate="header">
+                      <div class="section-title-header">
+                        <h4><strong>Información Adicional</strong></h4>
+                      </div>
+                    </ng-template>
+                    <ng-template pTemplate="content">
+                      <div class="observaciones-container">
+                        <!-- Estado y estadísticas para modo ver -->
+                        <div *ngIf="isReadOnly && servicio" class="service-status-info">
+                          <div class="info-item">
+                            <label class="info-label">Estado:</label>
+                            <p-tag [value]="servicio.activo ? 'Activo' : 'Inactivo'"
+                                   [severity]="servicio.activo ? 'success' : 'danger'"
+                                   styleClass="tag-sm">
+                            </p-tag>
+                          </div>
+
+                          <div class="info-item">
+                            <label class="info-label">Precio Formateado:</label>
+                            <span class="info-value font-semibold text-green-600">
+                              {{ formatearPrecio(servicio.precio) }}
+                            </span>
+                          </div>
+
+                          <div class="info-item">
+                            <label class="info-label">Unidad de Medida:</label>
+                            <span class="info-value">{{ servicio.unidad }}</span>
+                          </div>
+                        </div>
+
+                        <!-- Mensaje informativo para modo crear -->
+                        <div *ngIf="!isReadOnly && modo === 'crear'" class="create-info">
+                          <div class="info-message">
+                            <i class="pi pi-info-circle text-blue-500 mr-2"></i>
+                            <div>
+                              <p class="font-semibold text-blue-700">Nuevo Servicio</p>
+                              <small class="text-blue-600">Complete la información requerida para crear el servicio</small>
+                            </div>
+                          </div>
+
+                          <div class="info-tips mt-3 p-3 bg-gray-50 rounded">
+                            <h6 class="font-semibold mb-2">💡 Consejos:</h6>
+                            <ul class="text-sm text-gray-700 list-disc list-inside">
+                              <li>Use nombres descriptivos y únicos</li>
+                              <li>Indique claramente la unidad de medida</li>
+                              <li>Establezca precios competitivos</li>
+                              <li>Active el servicio para que aparezca en cotizaciones</li>
+                            </ul>
+                          </div>
+                        </div>
+
+                        <!-- Mensaje informativo para modo editar -->
+                        <div *ngIf="!isReadOnly && modo === 'editar'" class="edit-info">
+                          <div class="info-message">
+                            <i class="pi pi-pencil text-orange-500 mr-2"></i>
+                            <div>
+                              <p class="font-semibold text-orange-700">Editando Servicio</p>
+                              <small class="text-orange-600">Modifique los campos necesarios y guarde los cambios</small>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </p-card>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </p-card>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div *ngIf="loading" class="loading-overlay">
+  <div class="loading-content">
+    <i class="pi pi-spin pi-spinner text-4xl mb-3"></i>
+    <p>Cargando servicio...</p>
+  </div>
+</div>

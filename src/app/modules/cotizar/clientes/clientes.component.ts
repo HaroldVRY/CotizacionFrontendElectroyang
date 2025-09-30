@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
@@ -53,7 +54,8 @@ export class ClientesComponent implements OnInit, OnDestroy {
   constructor(
     private clienteService: ClienteService,
     private requestHandler: RequestHandlerService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -179,24 +181,14 @@ export class ClientesComponent implements OnInit, OnDestroy {
    * Crear nuevo cliente
    */
   nuevoCliente(): void {
-    // TODO: Implementar navegación a formulario de creación de cliente
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Función pendiente',
-      detail: 'La funcionalidad de crear cliente será implementada próximamente'
-    });
+    this.router.navigate(['/cotizar/clientes', 'nuevo']);
   }
 
   /**
    * Ver detalle de cliente
    */
   verDetalle(cliente: Cliente): void {
-    // TODO: Implementar navegación a detalle del cliente
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Ver Cliente',
-      detail: `Mostrando detalles de: ${cliente.nombre}`
-    });
+    this.router.navigate(['/cotizar/clientes', cliente.id]);
   }
 
   limpiarFiltros(): void {

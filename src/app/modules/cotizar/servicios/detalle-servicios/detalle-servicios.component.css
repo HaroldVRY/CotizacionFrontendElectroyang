@@ -22,6 +22,47 @@ input {
   background-color: #fff !important;
 }
 
+/* ==== ESTILOS PARA DROPDOWN DE ESTADO ==== */
+::ng-deep .p-dropdown {
+  width: 100% !important;
+}
+
+::ng-deep .p-dropdown.p-disabled {
+  background-color: #EEF4FF !important;
+  border-color: #ced4da !important;
+  cursor: not-allowed !important;
+  opacity: 0.9 !important;
+}
+
+::ng-deep .p-dropdown.p-disabled .p-dropdown-label {
+  color: #495057 !important;
+}
+
+/* Estilos específicos para el dropdown de estado activo/inactivo */
+::ng-deep .p-dropdown-item[aria-label="Activo"] {
+  color: #059669 !important;
+  font-weight: 600;
+}
+
+::ng-deep .p-dropdown-item[aria-label="Inactivo"] {
+  color: #dc2626 !important;
+  font-weight: 600;
+}
+
+::ng-deep .p-dropdown-label {
+  font-weight: 600;
+}
+
+/* Color del label cuando está activo */
+::ng-deep .p-dropdown[data-value="true"] .p-dropdown-label {
+  color: #059669 !important;
+}
+
+/* Color del label cuando está inactivo */
+::ng-deep .p-dropdown[data-value="false"] .p-dropdown-label {
+  color: #dc2626 !important;
+}
+
 
 
 

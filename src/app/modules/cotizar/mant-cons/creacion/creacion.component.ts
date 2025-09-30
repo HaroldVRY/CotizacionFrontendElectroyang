@@ -93,8 +93,18 @@ export class CreacionComponent implements OnInit, OnDestroy {
 
     // Obtener parámetros de la ruta
     this.route.queryParams.subscribe(params => {
-      this.cotizacionId = params['id'] || null;
-      this.modo = params['modo'] || 'crear';
+      const nuevoModo = params['modo'] || 'crear';
+      const nuevoCotizacionId = params['id'] || null;
+
+      // Si el modo cambió, actualizar el estado del formulario
+      if (this.modo !== nuevoModo) {
+        this.modo = nuevoModo;
+        this.updateFormState();
+      } else {
+        this.modo = nuevoModo;
+      }
+
+      this.cotizacionId = nuevoCotizacionId;
 
       // Asegurar que activeTab esté inicializado
       this.activeTab = '0';
@@ -102,7 +112,8 @@ export class CreacionComponent implements OnInit, OnDestroy {
       if (this.cotizacionId) {
         this.loadCotizacion();
       } else {
-        // En modo crear, forzar detección de cambios
+        // En modo crear, asegurar que el formulario esté habilitado
+        this.cotizacionForm.enable();
         this.cdr.detectChanges();
       }
     });
@@ -195,7 +206,7 @@ export class CreacionComponent implements OnInit, OnDestroy {
         next: (response: any) => {
           this.clientes = response.data || [];
           this.clientesSugeridos = this.clientes; // Inicializar sugerencias
-          console.log('📊 Clientes cargados:', this.clientes.length);
+              // console.log('📊📊📊 itemsParaTabla llamado');
           console.log('🔍 Primeros clientes:', this.clientes.slice(0, 3).map(c => c.nombre));
         },
         error: (error: any) => {
@@ -313,10 +324,8 @@ export class CreacionComponent implements OnInit, OnDestroy {
 
     // No agregar item vacío - solo cargar los items existentes
 
-    // Deshabilitar formulario si es modo ver
-    if (this.modo === 'ver') {
-      this.cotizacionForm.disable();
-    }
+    // Actualizar el estado del formulario según el modo
+    this.updateFormState();
 
     // Forzar detección de cambios y asegurar que activeTab esté establecido
     this.activeTab = '0';
@@ -443,9 +452,15 @@ export class CreacionComponent implements OnInit, OnDestroy {
    * Obtener items para mostrar en la tabla - FormArray en modo crear/editar, cotizacion.items en modo ver
    */
   get itemsParaTabla(): any[] {
+    console.log('�📊📊 itemsParaTabla llamado');
+    // console.log('🔍 Modo:', this.modo);
+    // console.log('🔍 FormArray existe:', !!this.itemsFormArray);
+    // console.log('🔍 FormArray length:', this.itemsFormArray?.length);
+    // console.log('🔍 Cotización existe:', !!this.cotizacion);
+
     if (this.modo === 'crear' || this.modo === 'duplicar' || (this.modo === 'editar' && this.itemsFormArray.length > 0)) {
       // En modo crear, duplicar o editar con FormArray, usar el FormArray
-      return this.itemsFormArray.controls.map((control, index) => {
+      const items = this.itemsFormArray.controls.map((control, index) => {
         const item = control.value;
         return {
           numeroItem: item.numeroItem || (index + 1),
@@ -455,9 +470,11 @@ export class CreacionComponent implements OnInit, OnDestroy {
           total: (item.cantidad || 0) * (item.precioUnitario || 0)
         };
       });
+      return items;
     } else if (this.cotizacion) {
       // En modo ver o cuando se carga una cotización existente, usar los datos cargados
-      return this.cotizacion.items || this.cotizacion.detalles || [];
+      const items = this.cotizacion.items || this.cotizacion.detalles || [];
+      return items;
     }
     return [];
   }
@@ -533,7 +550,16 @@ export class CreacionComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const formValue = this.cotizacionForm.value;
+    const formValue = this.cotizacionForm.getRawValue();
+    console.log('💾 Datos del formulario al guardar:', {
+      modo: this.modo,
+      receptor: formValue.receptor,
+      observaciones: formValue.observaciones,
+      tiempoEntrega: formValue.tiempoEntrega,
+      formaPago: formValue.formaPago,
+      formValue: formValue
+    });
+
     const clienteId = this.obtenerClienteId(formValue.cliente);
 
     if (!clienteId) {
@@ -764,7 +790,59 @@ export class CreacionComponent implements OnInit, OnDestroy {
     return this.modo === 'ver';
   }
 
+  /**
+   * Actualizar el estado del formulario según el modo actual
+   */
+  private updateFormState(): void {
+    // Solo deshabilitar campos específicos que nunca deben ser editables
+    // El HTML ya maneja la lógica de readonly con isReadOnly
+
+    // console.log('🔧 Actualizando estado del formulario para modo:', this.modo);
+
+    if (this.modo === 'editar') {
+      // Asegurar que el formulario esté habilitado
+      this.cotizacionForm.enable();
+
+      // Deshabilitar campos que nunca deben editarse después de crear
+      this.cotizacionForm.get('numero')?.disable();
+      this.cotizacionForm.get('fecha')?.disable();
+
+      // console.log('✅ Formulario habilitado para edición (excepto número y fecha)');
+    } else if (this.modo === 'crear' || this.modo === 'duplicar') {
+      // Habilitar todo el formulario
+      this.cotizacionForm.enable();
+      // console.log('✅ Formulario completamente habilitado para', this.modo);
+    }
+    // Para modo 'ver', no necesitamos deshabilitar el formulario aquí
+    // porque el HTML usa isReadOnly para manejar la visualización
+
+    this.cdr.detectChanges();
+  }
+
   // ===== MÉTODOS PARA GESTIÓN DE ITEMS (MODAL) =====
+
+
+
+  /**
+   * Método específico para botón editar en tabla
+   */
+  onEditarItemClick(index: number): void {
+    this.editarItem(index);
+  }
+
+  /**
+   * Método específico para botón eliminar en tabla
+   */
+  onEliminarItemClick(index: number): void {
+    console.log('🗑️�️🗑️ CLICK ELIMINAR DESDE TABLA - Índice:', index);
+    this.eliminarItem(index);
+  }
+
+
+
+
+
+
 
   /**
    * Inicializar formulario para nuevo item
@@ -799,24 +877,35 @@ export class CreacionComponent implements OnInit, OnDestroy {
    * Editar item existente
    */
   editarItem(index: number): void {
-    if (this.modo === 'ver' || !this.cotizacion?.detalles || !this.cotizacion.detalles[index]) return;
+    // Solo permitir edición en modos crear/editar
+    if (this.modo === 'ver') {
+      return;
+    }
+
+    // Verificar que el índice sea válido
+    if (index < 0 || index >= this.itemsFormArray.length) {
+      console.error('❌ Índice de item inválido para editar:', index);
+      return;
+    }
 
     this.modoEdicion = true;
     this.itemEditandoIndex = index;
-    const item = this.cotizacion.detalles[index];
 
-    // Precargar el formulario con los datos del item
+    // Obtener el item del FormArray
+    const itemFormGroup = this.itemsFormArray.at(index);
+    const itemValue = itemFormGroup.value;
+
+    // Precargar el formulario con los datos del item del FormArray
     this.agregarItemForm.reset({
-      servicioId: item.servicioId || null,
-      cantidad: item.cantidad || 1,
-      descripcion: item.descripcion || '',
-      precioUnitario: item.precioUnitario || 0
+      servicioId: itemValue.servicioId || null,
+      cantidad: itemValue.cantidad || 1,
+      descripcion: itemValue.descripcion || '',
+      precioUnitario: itemValue.precioUnitario || 0
     });
 
     // Si hay un servicio asociado, cargarlo
-    if (item.servicioId) {
-      // Buscar el servicio en la lista cargada
-      const servicio = this.servicios.find(s => s.id === item.servicioId);
+    if (itemValue.servicioId) {
+      const servicio = this.servicios.find(s => s.id === itemValue.servicioId);
       if (servicio) {
         this.servicioSeleccionado = servicio;
       }
@@ -924,6 +1013,12 @@ export class CreacionComponent implements OnInit, OnDestroy {
 
       this.cerrarDialogoAgregarItem();
       this.recalcularTotales();
+    } else {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'No se puede actualizar',
+        detail: 'Formulario inválido o error en el índice del item'
+      });
     }
   }
 
@@ -952,6 +1047,12 @@ export class CreacionComponent implements OnInit, OnDestroy {
 
       this.cerrarDialogoAgregarItem();
       this.recalcularTotales();
+    } else {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Formulario inválido',
+        detail: 'Por favor complete todos los campos requeridos'
+      });
     }
   }
 
@@ -959,10 +1060,26 @@ export class CreacionComponent implements OnInit, OnDestroy {
    * Eliminar item - Solo maneja el estado local, no hace llamadas a la API
    */
   eliminarItem(index: number): void {
-    if (this.modo === 'ver') return;
+    // Solo permitir eliminación en modos crear/editar
+    if (this.modo === 'ver') {
+      return;
+    }
+
+    // Verificar que el índice sea válido
+    if (index < 0 || index >= this.itemsFormArray.length) {
+      console.error('❌ Índice de item inválido para eliminar:', index);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'No se puede eliminar el item: índice inválido'
+      });
+      return;
+    }
+
+    const itemValue = this.itemsFormArray.at(index).value;
 
     this.confirmationService.confirm({
-      message: '¿Está seguro de que desea eliminar este item?',
+      message: `¿Está seguro de que desea eliminar el item: "${itemValue.descripcion || 'Sin descripción'}"?`,
       header: 'Confirmar Eliminación',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Sí',

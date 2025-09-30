@@ -1,0 +1,231 @@
+<!-- Toast para mensajes -->
+<p-toast></p-toast>
+
+<!-- Dialog de confirmación -->
+<p-confirmDialog></p-confirmDialog>
+
+<p-toolbar styleClass="custom-toolbar">
+  <ng-template #start></ng-template>
+  <ng-template #center>
+    <h4>{{ pageTitle }} {{ cliente?.nombre || 'Cliente' }}</h4>
+  </ng-template>
+  <ng-template #end>
+    <div class="d-flex gap-2">
+      <!-- Botones para modo no readonly (crear/editar) -->
+      <p-button *ngIf="!isReadOnly" label="Guardar" icon="pi pi-save" severity="success" [loading]="saving"
+        (onClick)="guardarCliente()">
+      </p-button>
+
+      <!-- Botones para modo readonly (ver) -->
+      <p-button *ngIf="isReadOnly && clienteId" label="Editar"
+        icon="pi pi-pencil" severity="info" (onClick)="editarCliente()">
+      </p-button>
+      <p-button *ngIf="isReadOnly && clienteId" label="Eliminar"
+        icon="pi pi-trash" severity="danger" (onClick)="eliminarCliente()">
+      </p-button>
+
+      <p-button label="Cancelar" icon="pi pi-times" severity="secondary" (onClick)="cancelar()">
+      </p-button>
+    </div>
+  </ng-template>
+</p-toolbar>
+
+<!-- Contenido Principal -->
+<div class="main-content-wrapper" *ngIf="cliente || modo === 'crear'">
+  <div class="tab-panel-content">
+    <form [formGroup]="clienteForm">
+      <!-- Detalle del Cliente -->
+      <div class="detail-card">
+        <p-card class="info-fields-card" [style]="{ overflow: 'hidden' }">
+          <ng-template pTemplate="content">
+            <!-- Layout de 2 columnas -->
+            <div class="two-column-layout">
+              <!-- COLUMNA 1: Datos Generales -->
+              <div class="column-1">
+                <!-- Sección: Información General -->
+                <div class="info-section">
+                  <p-card class="info-fields-card" [style]="{ overflow: 'hidden' }">
+                    <ng-template pTemplate="header">
+                      <div class="section-title-header">
+                        <h4><strong>Información General del Cliente</strong></h4>
+                      </div>
+                    </ng-template>
+                    <ng-template pTemplate="content">
+                      <div class="info-fields-section-three-columns">
+                        <!-- COLUMNA 1: Información Básica -->
+                        <div class="info-fields-section-colum">
+                          <p-inputgroup class="md:!w-80">
+                            <p-inputgroup-addon>
+                              <i class="pi pi-user icon-primary icon-clickable icon-lg"></i>
+                            </p-inputgroup-addon>
+                            <p-iftalabel>
+                              <input type="text" pInputText formControlName="nombre" [readonly]="isReadOnly"
+                                placeholder="Ingrese el nombre del cliente"
+                                pTooltip="{{clienteForm.get('nombre')?.value || 'Nombre del cliente'}}"
+                                tooltipPosition="top" [showDelay]="300" id="nombreCliente" />
+                              <label for="nombreCliente">Nombre</label>
+                            </p-iftalabel>
+                          </p-inputgroup>
+
+                          <p-inputgroup class="md:!w-80">
+                            <p-inputgroup-addon>
+                              <i class="pi pi-id-card icon-primary icon-clickable icon-lg"></i>
+                            </p-inputgroup-addon>
+                            <p-iftalabel>
+                              <input type="text" pInputText formControlName="ruc" [readonly]="isReadOnly"
+                                placeholder="Ingrese el RUC"
+                                pTooltip="{{clienteForm.get('ruc')?.value || 'RUC del cliente'}}"
+                                tooltipPosition="top" [showDelay]="300" id="rucCliente" />
+                              <label for="rucCliente">RUC</label>
+                            </p-iftalabel>
+                          </p-inputgroup>
+
+                          <p-inputgroup class="md:!w-80">
+                            <p-inputgroup-addon>
+                              <i class="pi pi-envelope icon-primary icon-clickable icon-lg"></i>
+                            </p-inputgroup-addon>
+                            <p-iftalabel>
+                              <input type="email" pInputText formControlName="email" [readonly]="isReadOnly"
+                                placeholder="Ingrese el email"
+                                pTooltip="{{clienteForm.get('email')?.value || 'Email del cliente'}}"
+                                tooltipPosition="top" [showDelay]="300" id="emailCliente" />
+                              <label for="emailCliente">Email</label>
+                            </p-iftalabel>
+                          </p-inputgroup>
+                        </div>
+
+                        <!-- COLUMNA 2: Información de Contacto -->
+                        <div class="info-fields-section-colum">
+                          <p-inputgroup class="md:!w-80">
+                            <p-inputgroup-addon>
+                              <i class="pi pi-phone icon-primary icon-clickable icon-lg"></i>
+                            </p-inputgroup-addon>
+                            <p-iftalabel>
+                              <input type="text" pInputText formControlName="telefono" [readonly]="isReadOnly"
+                                placeholder="Ingrese el teléfono"
+                                pTooltip="{{clienteForm.get('telefono')?.value || 'Teléfono del cliente'}}"
+                                tooltipPosition="top" [showDelay]="300" id="telefonoCliente" />
+                              <label for="telefonoCliente">Teléfono</label>
+                            </p-iftalabel>
+                          </p-inputgroup>
+
+                          <p-inputgroup class="md:!w-80">
+                            <p-inputgroup-addon>
+                              <i class="pi pi-users icon-primary icon-clickable icon-lg"></i>
+                            </p-inputgroup-addon>
+                            <p-iftalabel>
+                              <input type="text" pInputText formControlName="contacto" [readonly]="isReadOnly"
+                                placeholder="Ingrese el nombre del contacto"
+                                pTooltip="{{clienteForm.get('contacto')?.value || 'Persona de contacto'}}"
+                                tooltipPosition="top" [showDelay]="300" id="contactoCliente" />
+                              <label for="contactoCliente">Persona de Contacto</label>
+                            </p-iftalabel>
+                          </p-inputgroup>
+
+                          <p-inputgroup class="md:!w-80" *ngIf="isReadOnly && cliente?.created_at">
+                            <p-inputgroup-addon>
+                              <i class="pi pi-calendar icon-primary icon-clickable icon-lg"></i>
+                            </p-inputgroup-addon>
+                            <p-iftalabel>
+                              <input type="text" pInputText
+                                [value]="(cliente?.created_at | date:'dd/MM/yyyy') || '-'" readonly
+                                pTooltip="{{(cliente?.created_at | date:'dd/MM/yyyy') || '-'}}"
+                                tooltipPosition="top" [showDelay]="300" id="fechaCreacion" />
+                              <label for="fechaCreacion">Fecha de Creación</label>
+                            </p-iftalabel>
+                          </p-inputgroup>
+                        </div>
+
+                        <!-- COLUMNA 3: Dirección (columna completa) -->
+                        <div class="info-fields-section-colum">
+                          <p-inputgroup class="md:!w-80">
+                            <p-inputgroup-addon>
+                              <i class="pi pi-map-marker icon-primary icon-clickable icon-lg"></i>
+                            </p-inputgroup-addon>
+                            <p-iftalabel>
+                              <textarea pInputTextarea formControlName="direccion" [readonly]="isReadOnly"
+                                rows="6" class="w-full"
+                                placeholder="Ingrese la dirección completa"
+                                pTooltip="{{clienteForm.get('direccion')?.value || 'Dirección del cliente'}}"
+                                tooltipPosition="top" [showDelay]="300" id="direccionCliente">
+                              </textarea>
+                              <label for="direccionCliente">Dirección</label>
+                            </p-iftalabel>
+                          </p-inputgroup>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </p-card>
+                </div>
+              </div>
+
+              <!-- COLUMNA 2: Información Adicional -->
+              <div class="column-2">
+                <div class="info-section">
+                  <p-card class="info-fields-card" [style]="{ overflow: 'hidden' }">
+                    <ng-template pTemplate="header">
+                      <div class="section-title-header">
+                        <h4><strong>Información Adicional</strong></h4>
+                      </div>
+                    </ng-template>
+                    <ng-template pTemplate="content">
+                      <div class="observaciones-container">
+                        <!-- Estado y fecha de actualización para modo ver -->
+                        <div *ngIf="isReadOnly && cliente" class="client-status-info">
+                          <div class="info-item">
+                            <label class="info-label">ID Cliente:</label>
+                            <span class="info-value">{{ cliente.id }}</span>
+                          </div>
+
+                          <div class="info-item" *ngIf="cliente.updated_at">
+                            <label class="info-label">Última Actualización:</label>
+                            <span class="info-value">{{ cliente.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
+                          </div>
+
+                          <div class="info-item">
+                            <label class="info-label">Estado:</label>
+                            <p-tag value="Activo" severity="success" styleClass="tag-sm"></p-tag>
+                          </div>
+                        </div>
+
+                        <!-- Mensaje informativo para modo crear -->
+                        <div *ngIf="!isReadOnly && modo === 'crear'" class="create-info">
+                          <div class="info-message">
+                            <i class="pi pi-info-circle text-blue-500 mr-2"></i>
+                            <div>
+                              <p class="font-semibold text-blue-700">Nuevo Cliente</p>
+                              <small class="text-blue-600">Complete la información requerida para crear el cliente</small>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Mensaje informativo para modo editar -->
+                        <div *ngIf="!isReadOnly && modo === 'editar'" class="edit-info">
+                          <div class="info-message">
+                            <i class="pi pi-pencil text-orange-500 mr-2"></i>
+                            <div>
+                              <p class="font-semibold text-orange-700">Editando Cliente</p>
+                              <small class="text-orange-600">Modifique los campos necesarios y guarde los cambios</small>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </p-card>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </p-card>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div *ngIf="loading" class="loading-overlay">
+  <div class="loading-content">
+    <i class="pi pi-spin pi-spinner text-4xl mb-3"></i>
+    <p>Cargando cliente...</p>
+  </div>
+</div>

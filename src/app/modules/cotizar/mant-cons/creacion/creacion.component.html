@@ -451,14 +451,20 @@
                         </td>
                         <td *ngIf="!isReadOnly" class="text-center">
                           <div class="flex gap-1 justify-content-center">
-                            <p-button icon="pi pi-pencil" severity="info" size="small" [text]="true"
-                              pTooltip="Editar item" tooltipPosition="top" (onClick)="editarItem(rowIndex)"
-                              styleClass="p-button-rounded p-button-text">
-                            </p-button>
-                            <p-button icon="pi pi-trash" severity="danger" size="small" [text]="true"
-                              pTooltip="Eliminar item" tooltipPosition="top" (onClick)="eliminarItem(rowIndex)"
-                              styleClass="p-button-rounded p-button-text">
-                            </p-button>
+                            <button type="button"
+                              class="btn btn-sm btn-outline-primary"
+                              (click)="onEditarItemClick(rowIndex)"
+                              [disabled]="modo === 'ver'"
+                              title="Editar item">
+                              <i class="pi pi-pencil"></i>
+                            </button>
+                            <button type="button"
+                              class="btn btn-sm btn-outline-danger"
+                              (click)="onEliminarItemClick(rowIndex)"
+                              [disabled]="modo === 'ver'"
+                              title="Eliminar item">
+                              <i class="pi pi-trash"></i>
+                            </button>
                           </div>
                         </td>
                       </tr>

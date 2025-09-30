@@ -25,6 +25,12 @@ export class MenuService {
       icon: 'pi pi-cog',
       iconRef: 'iconInicio'
     },
+    {
+      label: 'Producción',
+      routerLink: '/cotizar/produccion',
+      icon: 'pi pi-briefcase',
+      iconRef: 'iconProduccions'
+    },
     // {
     //   label: 'Mantenimiento y Consulta',
     //   icon: 'pi pi-search',

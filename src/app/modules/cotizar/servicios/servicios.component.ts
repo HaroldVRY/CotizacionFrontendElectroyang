@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
@@ -58,7 +59,8 @@ export class ServiciosComponent implements OnInit, OnDestroy {
   constructor(
     private servicioService: ServicioService,
     private requestHandler: RequestHandlerService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -222,24 +224,14 @@ export class ServiciosComponent implements OnInit, OnDestroy {
    * Crear nuevo servicio
    */
   nuevoServicio(): void {
-    // TODO: Implementar navegación a formulario de creación de servicio
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Función pendiente',
-      detail: 'La funcionalidad de crear servicio será implementada próximamente'
-    });
+    this.router.navigate(['/cotizar/servicios', 'nuevo']);
   }
 
   /**
    * Ver detalle de servicio
    */
   verDetalle(servicio: Servicio): void {
-    // TODO: Implementar navegación a detalle del servicio
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Ver Servicio',
-      detail: `Mostrando detalles de: ${servicio.nombre}`
-    });
+    this.router.navigate(['/cotizar/servicios', servicio.id]);
   }
 
   limpiarFiltros(): void {

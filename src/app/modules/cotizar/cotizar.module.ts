@@ -9,6 +9,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PrimeNgModule } from '../../prime-ng/prime-ng.module';
 import { DialogItemComponent } from './mant-cons/dialog-item/dialog-item.component';
 import { SharedModule } from '../../shared/shared.module';
+import { DetalleClientesComponent } from './clientes/detalle-clientes/detalle-clientes.component';
+import { DetalleServiciosComponent } from './servicios/detalle-servicios/detalle-servicios.component';
+import { ProduccionComponent } from './produccion/produccion.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +19,10 @@ import { SharedModule } from '../../shared/shared.module';
     MantConsComponent,
     CreacionComponent,
     ServiciosComponent,
-    DialogItemComponent
+    DialogItemComponent,
+    DetalleClientesComponent,
+    DetalleServiciosComponent,
+    ProduccionComponent
   ],
   imports: [
     CommonModule,
