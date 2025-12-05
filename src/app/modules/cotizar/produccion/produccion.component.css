@@ -1,0 +1,356 @@
+/* ========================================
+   ESTILOS GENERALES COMPACTOS
+   ======================================== */
+
+.custom-toolbar-compact {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ========================================
+   ESTADÍSTICAS INLINE EN TOOLBAR
+   ======================================== */
+
+.stats-inline {
+  border-left: 2px solid #dee2e6;
+  padding-left: 1rem;
+  margin-left: 0.5rem;
+}
+
+.stat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  cursor: default;
+  transition: all 0.2s;
+}
+
+.stat-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stat-badge i {
+  font-size: 0.875rem;
+}
+
+.stat-badge.stat-primary { background: #e7f3ff; border-color: #007bff; color: #007bff; }
+.stat-badge.stat-success { background: #e8f5e9; border-color: #28a745; color: #28a745; }
+.stat-badge.stat-info { background: #e1f5fe; border-color: #17a2b8; color: #17a2b8; }
+.stat-badge.stat-warning { background: #fff8e1; border-color: #ffc107; color: #d39e00; }
+.stat-badge.stat-danger { background: #ffebee; border-color: #dc3545; color: #dc3545; }
+.stat-badge.stat-secondary { background: #f8f9fa; border-color: #6c757d; color: #6c757d; }
+
+/* ========================================
+   CARDS DE MAQUINARIA COMPACTOS
+   ======================================== */
+
+.maquinaria-card-compact {
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #e9ecef;
+  height: 100%;
+}
+
+.maquinaria-card-compact:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border-color: #007bff;
+}
+
+.card-header-compact {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.5rem 0.75rem;
+}
+
+.icon-header {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.4rem;
+  border-radius: 6px;
+}
+
+/* ========================================
+   CONTENIDO COMPACTO
+   ======================================== */
+
+.content-compact {
+  padding: 0.5rem 0;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  padding: 0.25rem 0;
+}
+
+.info-item.info-full {
+  grid-column: 1 / -1;
+}
+
+.info-item i {
+  font-size: 0.875rem;
+  color: #6c757d;
+  min-width: 16px;
+}
+
+.info-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ========================================
+   PROGRESO COMPACTO
+   ======================================== */
+
+.progress-compact {
+  padding: 0.4rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.progress-compact .p-progressbar {
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+/* ========================================
+   TIEMPOS COMPACTOS
+   ======================================== */
+
+.time-compact {
+  display: flex;
+  justify-content: space-around;
+  padding: 0.4rem;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.time-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.time-item i {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+/* ========================================
+   FOOTER DE ACCIONES
+   ======================================== */
+
+.actions-footer {
+  padding-top: 0.25rem;
+  border-top: 1px solid #e9ecef;
+}
+
+/* ========================================
+   VISTA TABLA COMPACTA
+   ======================================== */
+
+.p-datatable-sm .p-datatable-thead > tr > th {
+  background: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 2px solid #dee2e6;
+  font-size: 0.8rem;
+}
+
+.p-datatable-sm .p-datatable-tbody > tr {
+  transition: background-color 0.15s ease;
+}
+
+.p-datatable-sm .p-datatable-tbody > tr:hover {
+  background-color: #f8f9fa;
+}
+
+.p-datatable-sm .p-datatable-tbody > tr > td {
+  padding: 0.4rem 0.75rem;
+  vertical-align: middle;
+  font-size: 0.8rem;
+}
+
+/* ========================================
+   UTILIDADES
+   ======================================== */
+
+.d-flex {
+  display: flex;
+}
+
+.gap-1 { gap: 0.25rem; }
+.gap-2 { gap: 0.5rem; }
+
+.align-items-center { align-items: center; }
+.justify-content-between { justify-content: space-between; }
+.justify-content-center { justify-content: center; }
+.justify-content-end { justify-content: end; }
+.flex-wrap { flex-wrap: wrap; }
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 1rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mr-3 { margin-right: 1rem; }
+.m-0 { margin: 0; }
+
+.p-3 { padding: 1rem; }
+
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+
+/* ========================================
+   COLORES DE TEXTO
+   ======================================== */
+
+.text-primary { color: #007bff !important; }
+.text-success { color: #28a745 !important; }
+.text-info { color: #17a2b8 !important; }
+.text-warning { color: #ffc107 !important; }
+.text-danger { color: #dc3545 !important; }
+.text-gray-400 { color: #ced4da !important; }
+.text-gray-500 { color: #6c757d !important; }
+.text-gray-600 { color: #495057 !important; }
+
+/* ========================================
+   TAMAÑOS DE TEXTO
+   ======================================== */
+
+.text-xs { font-size: 0.7rem; }
+.text-sm { font-size: 0.8rem; }
+.text-lg { font-size: 1rem; }
+.text-xl { font-size: 1.125rem; }
+.text-2xl { font-size: 1.25rem; }
+.text-3xl { font-size: 1.5rem; }
+
+/* ========================================
+   PESO DE FUENTE
+   ======================================== */
+
+.font-medium { font-weight: 500; }
+.font-bold { font-weight: 700; }
+
+/* ========================================
+   OTROS
+   ======================================== */
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.opacity-70 {
+  opacity: 0.7;
+}
+
+/* ========================================
+   LOADING OVERLAY
+   ======================================== */
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.custom-spinner {
+  width: 60px;
+  height: 60px;
+}
+
+/* ========================================
+   TAGS
+   ======================================== */
+
+.p-tag {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+  .stats-inline {
+    display: none !important; /* Ocultar estadísticas inline en móvil */
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .time-compact {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+@media (min-width: 1400px) {
+  .col-xl-3 {
+    flex: 0 0 auto;
+    width: 25%;
+  }
+}
+
+/* ========================================
+   SCROLLBAR PERSONALIZADO
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

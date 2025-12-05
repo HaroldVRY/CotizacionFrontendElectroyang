@@ -1,1 +1,242 @@
-<p>produccion works!</p>
+<!-- Toast para mensajes -->
+<p-toast></p-toast>
+
+<!-- Toolbar compacto con estadísticas integradas -->
+<p-toolbar styleClass="custom-toolbar-compact mb-2">
+  <ng-template #start>
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+      <h5 class="m-0 mr-3">Producción</h5>
+
+      <!-- Estadísticas compactas inline -->
+      <div class="stats-inline d-flex gap-2">
+        <span class="stat-badge stat-primary" pTooltip="Total Maquinarias">
+          <i class="pi pi-sitemap"></i> {{ estadisticas.total }}
+        </span>
+        <span class="stat-badge stat-success" pTooltip="Operativas">
+          <i class="pi pi-check-circle"></i> {{ estadisticas.operativas }}
+        </span>
+        <span class="stat-badge stat-info" pTooltip="En Pausa">
+          <i class="pi pi-pause-circle"></i> {{ estadisticas.pausadas }}
+        </span>
+        <span class="stat-badge stat-warning" pTooltip="Mantenimiento">
+          <i class="pi pi-wrench"></i> {{ estadisticas.mantenimiento }}
+        </span>
+        <span class="stat-badge stat-danger" pTooltip="Detenidas">
+          <i class="pi pi-ban"></i> {{ estadisticas.detenidas }}
+        </span>
+        <span class="stat-badge stat-secondary" pTooltip="Progreso Promedio">
+          <i class="pi pi-chart-line"></i> {{ estadisticas.progresoPromedio }}%
+        </span>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #end>
+    <div class="d-flex gap-2 align-items-center">
+      <!-- Búsqueda compacta -->
+      <p-iconfield iconPosition="left">
+        <p-inputicon><i class="pi pi-search"></i></p-inputicon>
+        <input pInputText type="text" [(ngModel)]="filtroBusqueda" size="small"
+               placeholder="Buscar..." style="width: 200px;" />
+      </p-iconfield>
+
+      <!-- Filtro por estado -->
+      <p-dropdown [(ngModel)]="filtroEstado" [options]="estadoOptions" size="small"
+                  optionLabel="label" optionValue="value" placeholder="Estado">
+      </p-dropdown>
+
+      <!-- Botón refrescar -->
+      <p-button icon="pi pi-refresh" severity="info" size="small"
+                (onClick)="refrescar()" [loading]="loading" [text]="true"
+                pTooltip="Refrescar">
+      </p-button>
+
+      <!-- Cambiar vista -->
+      <p-selectbutton [options]="[
+        {icon: 'pi pi-th-large', value: 'grid'},
+        {icon: 'pi pi-list', value: 'lista'}
+      ]" [(ngModel)]="vistaActual" optionLabel="icon" optionValue="value" size="small">
+        <ng-template let-item pTemplate>
+          <i [class]="item.icon"></i>
+        </ng-template>
+      </p-selectbutton>
+    </div>
+  </ng-template>
+</p-toolbar>
+
+<!-- Vista Grid (Cards) compacta -->
+<div *ngIf="vistaActual === 'grid'" class="grid">
+  <div *ngFor="let maquinaria of maquinariasFiltradas"
+       class="col-12 md:col-6 lg:col-4 xl:col-3">
+    <p-card styleClass="maquinaria-card-compact">
+      <!-- Header compacto -->
+      <ng-template pTemplate="header">
+        <div class="card-header-compact">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <i [class]="maquinaria.icono" class="text-xl icon-header"></i>
+              <div>
+                <div class="font-bold text-sm">{{ maquinaria.nombre }}</div>
+                <div class="text-xs opacity-70">{{ maquinaria.id }}</div>
+              </div>
+            </div>
+            <p-tag [value]="getEstadoLabel(maquinaria.estado)" size="small"
+                   [severity]="getEstadoSeverity(maquinaria.estado)">
+            </p-tag>
+          </div>
+        </div>
+      </ng-template>
+
+      <!-- Contenido compacto -->
+      <div class="content-compact">
+        <!-- Info en 2 columnas -->
+        <div class="info-grid">
+          <div class="info-item">
+            <i class="pi pi-user"></i>
+            <span>{{ maquinaria.operario }}</span>
+          </div>
+          <div class="info-item" *ngIf="maquinaria.ordenCotizacion !== 'N/A'">
+            <i class="pi pi-file"></i>
+            <span>{{ maquinaria.numeroOrden }}</span>
+          </div>
+          <div class="info-item info-full" *ngIf="maquinaria.ordenCotizacion !== 'N/A'">
+            <i class="pi pi-building"></i>
+            <span class="text-truncate">{{ maquinaria.cliente }}</span>
+          </div>
+          <div class="info-item info-full">
+            <i class="pi pi-box"></i>
+            <span class="text-truncate">{{ maquinaria.productoActual }}</span>
+          </div>
+        </div>
+
+        <!-- Progreso inline -->
+        <div class="progress-compact" *ngIf="maquinaria.estado === 'operativa' || maquinaria.estado === 'en-pausa'">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="text-xs">{{ maquinaria.unidadesProducidas }}/{{ maquinaria.unidadesTotales }}</span>
+            <span class="text-xs font-bold">{{ maquinaria.progreso }}%</span>
+          </div>
+          <p-progressbar [value]="maquinaria.progreso" [showValue]="false" [style]="{'height': '6px'}">
+          </p-progressbar>
+        </div>
+
+        <!-- Tiempos en línea -->
+        <div class="time-compact" *ngIf="maquinaria.estado === 'operativa' || maquinaria.estado === 'en-pausa'">
+          <span class="time-item">
+            <i class="pi pi-clock"></i> {{ maquinaria.tiempoTranscurrido }}
+          </span>
+          <span class="time-item">
+            <i class="pi pi-hourglass"></i> {{ maquinaria.tiempoRestante }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Footer con acciones inline -->
+      <ng-template pTemplate="footer">
+        <div class="d-flex gap-1 justify-content-end actions-footer">
+          <p-button icon="pi pi-eye" severity="info" size="small" [text]="true"
+                    (onClick)="verDetalle(maquinaria)" pTooltip="Ver detalle">
+          </p-button>
+          <p-button *ngIf="maquinaria.estado === 'operativa'" icon="pi pi-pause"
+                    severity="warn" size="small" [text]="true"
+                    (onClick)="pausarProduccion(maquinaria)" pTooltip="Pausar">
+          </p-button>
+          <p-button *ngIf="maquinaria.estado === 'en-pausa'" icon="pi pi-play"
+                    severity="success" size="small" [text]="true"
+                    (onClick)="reanudarProduccion(maquinaria)" pTooltip="Reanudar">
+          </p-button>
+          <p-button *ngIf="maquinaria.estado === 'operativa' || maquinaria.estado === 'en-pausa'"
+                    icon="pi pi-stop" severity="danger" size="small" [text]="true"
+                    (onClick)="detenerProduccion(maquinaria)" pTooltip="Detener">
+          </p-button>
+        </div>
+      </ng-template>
+    </p-card>
+  </div>
+</div>
+
+<!-- Vista Lista compacta -->
+<div *ngIf="vistaActual === 'lista'">
+  <p-table [value]="maquinariasFiltradas" [loading]="loading"
+           styleClass="p-datatable-sm p-datatable-gridlines" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 180px;">Maquinaria</th>
+        <th style="width: 100px;">Estado</th>
+        <th style="width: 140px;">Operario</th>
+        <th style="width: 90px;">Orden</th>
+        <th style="width: 150px;">Cliente</th>
+        <th>Producto</th>
+        <th style="width: 120px;" class="text-center">Progreso</th>
+        <th style="width: 100px;">Tiempos</th>
+        <th style="width: 100px;" class="text-center">Acciones</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-maquinaria>
+      <tr>
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            <i [class]="maquinaria.icono" class="text-xl"></i>
+            <div>
+              <div class="font-medium text-sm">{{ maquinaria.nombre }}</div>
+              <div class="text-xs text-gray-500">{{ maquinaria.id }}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <p-tag [value]="getEstadoLabel(maquinaria.estado)" size="small"
+                 [severity]="getEstadoSeverity(maquinaria.estado)">
+          </p-tag>
+        </td>
+        <td class="text-sm">{{ maquinaria.operario }}</td>
+        <td class="text-sm">{{ maquinaria.numeroOrden }}</td>
+        <td class="text-sm">{{ maquinaria.cliente }}</td>
+        <td class="text-sm">{{ maquinaria.productoActual }}</td>
+        <td class="text-center">
+          <div *ngIf="maquinaria.progreso > 0" style="min-width: 80px;">
+            <div class="text-xs mb-1">{{ maquinaria.progreso }}%</div>
+            <p-progressbar [value]="maquinaria.progreso" [showValue]="false"
+                           [style]="{'height': '6px'}">
+            </p-progressbar>
+          </div>
+          <span *ngIf="maquinaria.progreso === 0" class="text-gray-400 text-xs">N/A</span>
+        </td>
+        <td>
+          <div class="text-xs" *ngIf="maquinaria.estado === 'operativa' || maquinaria.estado === 'en-pausa'">
+            <div>⏱️ {{ maquinaria.tiempoTranscurrido }}</div>
+            <div>⏳ {{ maquinaria.tiempoRestante }}</div>
+          </div>
+          <span *ngIf="maquinaria.estado !== 'operativa' && maquinaria.estado !== 'en-pausa'"
+                class="text-gray-400 text-xs">N/A</span>
+        </td>
+        <td class="text-center">
+          <div class="d-flex gap-1 justify-content-center">
+            <p-button icon="pi pi-eye" severity="info" size="small" [text]="true"
+                      (onClick)="verDetalle(maquinaria)" pTooltip="Ver">
+            </p-button>
+            <p-button *ngIf="maquinaria.estado === 'operativa'" icon="pi pi-pause"
+                      severity="warn" size="small" [text]="true"
+                      (onClick)="pausarProduccion(maquinaria)" pTooltip="Pausar">
+            </p-button>
+            <p-button *ngIf="maquinaria.estado === 'en-pausa'" icon="pi pi-play"
+                      severity="success" size="small" [text]="true"
+                      (onClick)="reanudarProduccion(maquinaria)" pTooltip="Reanudar">
+            </p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="9" class="text-center p-3">
+          <i class="pi pi-inbox text-2xl text-gray-400"></i>
+          <p class="text-gray-600 text-sm mt-2 mb-0">No se encontraron maquinarias</p>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Loading overlay -->
+<div *ngIf="loading" class="loading-overlay">
+  <p-progressspinner styleClass="custom-spinner"></p-progressspinner>
+</div>
